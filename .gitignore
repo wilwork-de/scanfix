@@ -4,5 +4,5 @@ __pycache__/
 venv/
 node_modules/
 tests/fixtures/
+tests/downloads/
 *.pdf
-!tests/attesi/*.pdf

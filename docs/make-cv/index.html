@@ -2,36 +2,92 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Generate a CV as a PDF — offline, English or Italian</title>
-<meta name="description" content="Build a one-page CV as a PDF, English or Italian, with the date and signature block in place. Offline — your details stay with you.">
+<title>Generate a CV as a PDF - in your browser, English or Italian</title>
+<meta name="description" content="Build a one-page CV as a PDF, English or Italian, with the date and signature block in place. Runs in your browser: your details stay in the tab.">
 <link rel="canonical" href="https://wilwork-de.github.io/scanfix/make-cv/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://wilwork-de.github.io/scanfix/make-cv/">
-<meta property="og:title" content="Generate a CV as a PDF — offline, English or Italian">
-<meta property="og:description" content="Build a one-page CV as a PDF, English or Italian, with the date and signature block in place. Offline — your details stay with you.">
+<meta property="og:title" content="Generate a CV as a PDF - in your browser, English or Italian">
+<meta property="og:description" content="Build a one-page CV as a PDF, English or Italian, with the date and signature block in place. Runs in your browser: your details stay in the tab.">
 <meta name="twitter:card" content="summary">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../style.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Generate a CV as a PDF", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/make-cv/", "description": "Build a one-page CV as a PDF, English or Italian, with the date and signature block in place. Offline \u2014 your details stay with you.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Generate a CV as a PDF", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/make-cv/", "description": "Build a one-page CV as a PDF, English or Italian, with the date and signature block in place. Runs in your browser: your details stay in the tab.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
 </head>
 <body>
 <div class="sheet">
 <nav class="top"><a href="../">scanfix</a> / CV generator</nav>
 <h1>Generate a CV as a PDF</h1>
-<p class="tagline">A one-page CV that comes out identical every time, with the date and signature block already where they belong.</p>
-<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. Your name, address and history stay in a file on your own machine — no form, no account, no server.</span></div>
-<h2>What it does</h2>
-<p>You fill in a dictionary at the top of the file and it builds a one-page PDF: the same output every time, text that stays selectable so an applicant tracking system can read it, and a date at the foot that updates itself.</p><p>Empty sections disappear rather than printing an empty heading, and the signature block goes where an institution expects it: the data-protection line first, then place and date on the left with the signature on the right.</p>
+<p class="tagline">One page, English or Italian, with the date and signature block already where they belong.</p>
+<div class="privacy-badge"><span aria-hidden="true">&#128274;</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. This tool runs inside your browser, on your own machine, and the page is served with a policy that forbids it to open a network connection at all. Your file has nowhere to go.</span></div>
+<p class="lead">You are applying for a job in Italy, the portal wants a CV with a date on it and a signature at the bottom, and the template you downloaded fights you every time you add a line. Fill this in instead. You get a one-page PDF whose text an applicant tracking system can still read.</p>
+<p class="hint">Nothing you type here is stored or sent. It lives in this
+tab until you close it.</p>
+<div class="fields">
+  <label>First name<input type="text" id="first_name" placeholder="Giulia"></label>
+  <label>Surname<input type="text" id="last_name" placeholder="Marchetti"></label>
+  <label class="wide">One line under your name: the role you are applying for
+    <input type="text" id="headline" placeholder="Junior systems administrator"></label>
+  <label>Date of birth<input type="text" id="born_on" placeholder="14/03/1996"></label>
+  <label>Place of birth<input type="text" id="born_in" placeholder="Novara"></label>
+  <label class="wide">Address
+    <input type="text" id="address" placeholder="Via delle Rose 12, 10125 Torino (TO)"></label>
+  <label>Phone<input type="text" id="phone" placeholder="+39 011 555 0142"></label>
+  <label>Email<input type="text" id="email" placeholder="giulia.marchetti@example.org"></label>
+  <label>LinkedIn, if you use it<input type="text" id="linkedin" placeholder="linkedin.com/in/..."></label>
+  <label>Driving licence<input type="text" id="licence" placeholder="Driving licence B"></label>
+  <label>Citizenship<input type="text" id="citizenship" placeholder="Italian"></label>
+</div>
+<label class="block">Education
+  <textarea id="education" rows="4" placeholder="Diploma in computer science | ITIS Avogadro - Torino | 2015
+Final mark 92/100"></textarea></label>
+<label class="block">Experience
+  <textarea id="experience" rows="8" placeholder="Help desk operator | Nordcom SpA - Torino | 03/2021 - present
+Handled about 40 tickets a week across Windows 10 and 11
+Wrote the runbook the rest of the desk now follows
+
+Shop assistant | Libreria Bodoni - Novara | 2018 - 2021
+Ran the stock system and the weekly order"></textarea></label>
+<label class="block">Skills
+  <textarea id="skills" rows="4" placeholder="Operating systems: Windows 10/11, Debian, Ubuntu
+Networking: TCP/IP, DNS, DHCP, VPN
+Tools: PowerShell, Bash, Git"></textarea></label>
+<label class="block">Languages
+  <textarea id="languages" rows="3" placeholder="Italian: native
+English: B2"></textarea></label>
+<label class="block">Anything else, one line each
+  <textarea id="other" rows="2" placeholder="Volunteer IT support at a local association"></textarea></label>
+<div class="fields">
+  <label>Language of the CV
+    <select id="locale"><option value="en">English</option><option value="it">Italiano</option></select>
+  </label>
+  <label>Place next to the date<input type="text" id="place" placeholder="Torino"></label>
+  <label>Date<input type="date" id="date"></label>
+  <label class="wide">A cut-out signature, if you have one
+    <input type="file" id="signature" accept="image/png,image/jpeg"></label>
+</div>
+<button type="button" id="build" class="button primary">Build the PDF</button>
+<p id="state" class="status" aria-live="polite"></p>
+<a id="save" class="button" hidden>Save the CV</a>
+<div id="notes" class="notes"></div>
+<h2>Writing the entries</h2>
+<p>One entry per block, with a blank line between blocks. The first line is the title, then the organisation, then the dates, separated by a vertical bar. Every line after that becomes a bullet.</p><p>Put a verb at the front of each bullet. "Responsible for" says nothing. "Handled 40 tickets a week" says what you did, and a number is worth more than an adjective.</p>
 <h2>English or Italian</h2>
-<p><code>--locale en</code> or <code>--locale it</code> switches the headings and the spelled-out date. The Italian version also carries the GDPR authorisation clause, which Italian employers and public bodies expect.</p><p class="caveat">A detail worth knowing if you write that clause yourself: do not cite <em>art. 13 del D.Lgs. 196/2003</em>. That article was repealed by D.Lgs. 101/2018, which harmonised the Italian Code with the GDPR — disclosure is now governed by articles 13 and 14 of the Regulation. Half the templates online still cite the repealed one.</p>
-<h2>Run it</h2>
-<h2>Run it</h2>
+<p>The switch changes the headings and spells the date out in the right language. The Italian version also carries the GDPR authorisation line, which Italian employers and public bodies expect to see on a CV.</p><p class="caveat">One detail if you ever write that line yourself: do not cite <em>art. 13 del D.Lgs. 196/2003</em>. That article was repealed by D.Lgs. 101/2018, which harmonised the Italian Code with the GDPR, and disclosure is now governed by articles 13 and 14 of the Regulation. Half the templates online still point at the repealed one.</p>
+<h2>About the signature</h2>
+<p>Institutional portals usually want a handwritten signature rather than a typed name. Sign a blank sheet, cut it out with <a href="../extract-signature/">the signature extractor</a>, and add the PNG here. It lands on the rule at the foot of the page.</p><p class="caveat">The built-in PDF fonts cover Western European text and nothing else. If you type a character outside that range the page tells you which one it had to leave out rather than losing it in silence.</p>
+<h2>The same CV from a terminal</h2>
+<p>The browser tool above is the same algorithm. Use the script when you
+have forty files to get through, or when you want it inside a pipeline.</p>
 <pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
 python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
 .venv/bin/python tools/make_cv.py --locale en -o cv.pdf</code></pre>
-<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+<p class="caveat">The virtual environment is not fussiness. On Debian and Ubuntu the
 system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
-because the operating system's own tooling depends on those packages.</p><p>Institutional portals often want a <em>handwritten</em> signature, not a typed name. Sign a blank sheet, cut it out with <a href="../extract-signature/">the signature extractor</a>, and pass <code>--signature signature.png</code>.</p>
+because the operating system's own tooling depends on those packages.</p><p>The script keeps your details in a dictionary at the top of the file, which is the better shape when you are tailoring the same CV to twenty applications.</p>
 <footer>
-<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+<p><a href="../">All tools</a> &middot; <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> &middot; MIT licence</p>
 </footer></div></body></html>
+<script type="module" src="../app/make-cv.js"></script>

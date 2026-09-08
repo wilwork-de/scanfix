@@ -112,9 +112,54 @@ def graphic_band():
     doc.close()
 
 
+def page_photo():
+    """A photographed page, as a JPEG: the input photo_to_pdf takes.
+
+    Rendered rather than photographed, for the same reason as everything else here —
+    a real photo of a real document would be somebody's document.
+    """
+    doc = pymupdf.open()
+    page = doc.new_page(width=300, height=400)
+    page.draw_rect(pymupdf.Rect(0, 0, 300, 400), color=(0.93, 0.92, 0.90),
+                   fill=(0.93, 0.92, 0.90))
+    page.insert_text((30, 60), "Delivery note", fontname="hebo", fontsize=14)
+    for i in range(8):
+        page.insert_text((30, 100 + i * 22), "Invented line of text, number %d" % (i + 1),
+                         fontname="helv", fontsize=9)
+    OUT.joinpath("page_photo.jpg").write_bytes(page.get_pixmap(dpi=96).tobytes("jpg"))
+    doc.close()
+
+
+def signature_png():
+    """A cut-out signature: a squiggle whose alpha channel comes from its darkness.
+
+    Built the way extract_signature.py builds one — dark pixels opaque, paper
+    transparent — so what the PDF tools embed here is shaped like what the signature
+    extractor hands them.
+    """
+    doc = pymupdf.open()
+    page = doc.new_page(width=90, height=30)
+    page.draw_polyline([(6, 22), (20, 8), (34, 24), (48, 7), (66, 21), (84, 11)],
+                       color=(0.08, 0.08, 0.12), width=2.2)
+    flat = page.get_pixmap(alpha=False)
+    alpha = bytearray(flat.width * flat.height)
+    for y in range(flat.height):
+        for x in range(flat.width):
+            r, g, b = flat.pixel(x, y)
+            # The same ramp extract_signature.py uses: paper transparent, ink solid,
+            # the values between left semi-transparent so the edges stay smooth.
+            value = (205 - min(r, g, b)) / 110 * 255
+            alpha[y * flat.width + x] = max(0, min(255, int(value)))
+    pix = pymupdf.Pixmap(flat, 1)
+    pix.set_alpha(bytes(alpha))
+    pix.save(OUT / "signature.png")
+    doc.close()
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    for f in (fake_redaction, real_redaction, photo_with_boxes, clean_document, graphic_band):
+    for f in (fake_redaction, real_redaction, photo_with_boxes, clean_document,
+              graphic_band, page_photo, signature_png):
         f()
         print(f"  {f.__name__}")
     print(f"Fixtures in {OUT}")

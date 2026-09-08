@@ -2,36 +2,64 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Extract a signature from a photo — offline, nothing uploaded</title>
-<meta name="description" content="Cut a handwritten signature out of a photograph and save it as a transparent PNG, offline on your own machine. Your signature is never uploaded to any server.">
+<title>Extract a signature from a photo - in your browser, nothing uploaded</title>
+<meta name="description" content="Cut a handwritten signature out of a photograph and save it as a transparent PNG, entirely in your browser. Your signature is never uploaded to any server.">
 <link rel="canonical" href="https://wilwork-de.github.io/scanfix/extract-signature/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://wilwork-de.github.io/scanfix/extract-signature/">
-<meta property="og:title" content="Extract a signature from a photo — offline, nothing uploaded">
-<meta property="og:description" content="Cut a handwritten signature out of a photograph and save it as a transparent PNG, offline on your own machine. Your signature is never uploaded to any server.">
+<meta property="og:title" content="Extract a signature from a photo - in your browser, nothing uploaded">
+<meta property="og:description" content="Cut a handwritten signature out of a photograph and save it as a transparent PNG, entirely in your browser. Your signature is never uploaded to any server.">
 <meta name="twitter:card" content="summary">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../style.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Extract a signature from a photo", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/extract-signature/", "description": "Cut a handwritten signature out of a photograph and save it as a transparent PNG, offline on your own machine. Your signature is never uploaded to any server.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Extract a signature from a photo", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/extract-signature/", "description": "Cut a handwritten signature out of a photograph and save it as a transparent PNG, entirely in your browser. Your signature is never uploaded to any server.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
 </head>
 <body>
 <div class="sheet">
 <nav class="top"><a href="../">scanfix</a> / Signature extractor</nav>
 <h1>Extract a signature from a photo</h1>
 <p class="tagline">Turn a photo of your signature into a transparent PNG you can lay on any document.</p>
-<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. The tool runs on your own machine, from your terminal: the document never leaves it and no server is involved.</span></div>
-<h2>What it does</h2>
-<p>You photograph your signature, and it comes back as a PNG with a transparent background, trimmed to the strokes. Lay it on a contract, a form or a CV and the document stays sharp text instead of becoming a blurry scan of a printed page.</p><p>The separation is not a hard threshold. The illumination is corrected first, then the alpha channel is built from how dark each pixel is: light paper becomes transparent, dark ink opaque, and the values between stay semi-transparent. That keeps the edges smooth — a hard cut-off produces a jagged signature that looks obviously pasted.</p>
+<div class="privacy-badge"><span aria-hidden="true">&#128274;</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. This tool runs inside your browser, on your own machine, and the page is served with a policy that forbids it to open a network connection at all. Your file has nowhere to go.</span></div>
+<p class="lead">A form wants a handwritten signature, and you would rather not print it, sign it, photograph the whole page and upload a grey picture of A4. Sign a blank sheet instead, photograph that, and cut the signature out here. You get a PNG with a transparent background that sits on the real document, which stays sharp text.</p>
+<div id="drop" role="button" tabindex="0" aria-label="Choose a photo of your signature">
+  <strong>Drop a photo of your signature here</strong>
+  <span>or click to choose one</span>
+  <input type="file" id="picker" accept="image/*">
+</div>
+<div id="stage" class="stage" hidden>
+  <canvas id="shot"></canvas>
+  <div id="box" class="croparea"><span id="handle" class="handle"></span></div>
+</div>
+<p class="hint">Drag a box around the signature. Drag inside it to move it, or the corner
+to resize.</p>
+<div class="controls">
+  <label class="slider">Anything lighter than this is paper
+    <input type="range" id="light" min="150" max="245" step="1" value="205"></label>
+  <label class="slider">Anything darker than this is solid ink
+    <input type="range" id="dark" min="20" max="160" step="1" value="95"></label>
+  <label><input type="checkbox" id="colour"> Keep the pen colour</label>
+</div>
+<p id="state" class="status" aria-live="polite"></p>
+<div id="result" class="preview chequered"></div>
+<a id="save" class="button" hidden>Save the PNG</a>
+<p class="hint">The same crop on the command line:
+<code id="fractions">--box 0.45,0.70,1.00,0.97</code></p>
 <h2>Sign on a blank sheet</h2>
-<p>This is the one tip that matters. Sign a plain white sheet and photograph that, rather than photographing a form you have already signed. On a form the printed signature rule runs through your signature, and separating the two is genuinely hard: on a real case the rule was tilted just enough that its longest unbroken run in any pixel row reached 15% of the width while the signature's own strokes reached 13% — the two overlap, so no threshold removes one without eating the other.</p><p>On a blank sheet there is nothing to separate.</p>
-<h2>Run it</h2>
-<h2>Run it</h2>
+<p>This is the one piece of advice that changes the result.</p><p>Photograph a signature written on plain paper, rather than one already sitting on a form. On a form the printed signature rule runs straight through your handwriting, and separating the two is genuinely hard. Measured on a real photo: the rule was tilted just enough that its longest unbroken run inside any pixel row reached 15% of the width, while the signature's own strokes reached 13%. The two populations overlap. No threshold takes the rule out without eating part of the signature.</p><p>On a blank sheet there is nothing to separate.</p>
+<h2>The detail, if you want it: the edges are a ramp</h2>
+<p>The lighting gets corrected first, the same way <a href="../clean-scan/">the scan cleanup</a> does it. Then the alpha channel is built from how dark each pixel is. Light paper goes fully transparent, dark ink fully opaque, and everything between them lands partly transparent.</p><p>That middle band is the whole point. A hard threshold gives you a signature with staircase edges that reads as pasted on the moment anyone looks at it.</p><p class="caveat">The two sliders are the numbers to move if the result is wrong. Raise the paper threshold when the signature comes out faint. Lower it when grime from the background survives.</p>
+<h2>The same extraction from a terminal</h2>
+<p>The browser tool above is the same algorithm. Use the script when you
+have forty files to get through, or when you want it inside a pipeline.</p>
 <pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
 python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
 .venv/bin/python tools/extract_signature.py photo.jpg -o signature.png</code></pre>
-<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+<p class="caveat">The virtual environment is not fussiness. On Debian and Ubuntu the
 system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
-because the operating system's own tooling depends on those packages.</p><p>Not sure which part of the photo to use? <code>--preview grid.png</code> writes a copy with a labelled grid, so you can read the four numbers off it and pass <code>--box x0,y0,x1,y1</code>. <code>--blue</code> keeps the pen colour instead of forcing black.</p>
+because the operating system's own tooling depends on those packages.</p><p><code>--preview grid.png</code> writes a copy with a labelled grid so you can read the four numbers off it, which is the command line's version of the box you drag above. <code>--blue</code> keeps the pen colour.</p>
 <footer>
-<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+<p><a href="../">All tools</a> &middot; <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> &middot; MIT licence</p>
 </footer></div></body></html>
+<script type="module" src="../app/extract-signature.js"></script>

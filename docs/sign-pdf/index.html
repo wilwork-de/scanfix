@@ -2,36 +2,60 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Add a date and signature line to a PDF — offline, no upload</title>
-<meta name="description" content="Add a place, a date and a signature rule to the foot of an existing PDF without rebuilding it. Runs offline on your own machine; the document is never uploaded.">
+<title>Add a date and signature line to a PDF - no upload</title>
+<meta name="description" content="Add a place, a date and a signature rule to the foot of an existing PDF without rebuilding it. Runs in your browser; the document is never uploaded.">
 <link rel="canonical" href="https://wilwork-de.github.io/scanfix/sign-pdf/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://wilwork-de.github.io/scanfix/sign-pdf/">
-<meta property="og:title" content="Add a date and signature line to a PDF — offline, no upload">
-<meta property="og:description" content="Add a place, a date and a signature rule to the foot of an existing PDF without rebuilding it. Runs offline on your own machine; the document is never uploaded.">
+<meta property="og:title" content="Add a date and signature line to a PDF - no upload">
+<meta property="og:description" content="Add a place, a date and a signature rule to the foot of an existing PDF without rebuilding it. Runs in your browser; the document is never uploaded.">
 <meta name="twitter:card" content="summary">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../style.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Add a date and signature line to a PDF", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/sign-pdf/", "description": "Add a place, a date and a signature rule to the foot of an existing PDF without rebuilding it. Runs offline on your own machine; the document is never uploaded.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Add a date and signature line to a PDF", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/sign-pdf/", "description": "Add a place, a date and a signature rule to the foot of an existing PDF without rebuilding it. Runs in your browser; the document is never uploaded.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
 </head>
 <body>
 <div class="sheet">
 <nav class="top"><a href="../">scanfix</a> / Date and signature</nav>
 <h1>Add a date and signature line to a PDF</h1>
 <p class="tagline">Write only what is missing at the foot of a document you already have.</p>
-<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. The tool runs on your own machine, from your terminal: the document never leaves it and no server is involved.</span></div>
+<div class="privacy-badge"><span aria-hidden="true">&#128274;</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. This tool runs inside your browser, on your own machine, and the page is served with a policy that forbids it to open a network connection at all. Your file has nowhere to go.</span></div>
+<p class="lead">The document is finished. It just needs a place, a date and somewhere to sign, and you do not want to reopen the word processor and re-export the whole thing. Drop the PDF in, fill in two fields, save it back out. Everything above the block is untouched.</p>
+<div id="drop" role="button" tabindex="0" aria-label="Choose a PDF to sign">
+  <strong>Drop the PDF here</strong>
+  <span>or click to choose one</span>
+  <input type="file" id="picker" accept="application/pdf,.pdf">
+</div>
+<p class="chosen" id="chosen"></p>
+<div class="fields">
+  <label>Place<input type="text" id="place" placeholder="Turin"></label>
+  <label>Date<input type="date" id="date"></label>
+  <label>Language of the date
+    <select id="locale"><option value="en">English</option><option value="it">Italiano</option></select>
+  </label>
+  <label>Word above the rule<input type="text" id="label" value="Signature"></label>
+  <label class="wide">A cut-out signature, if you have one
+    <input type="file" id="signature" accept="image/png,image/jpeg"></label>
+</div>
+<p id="state" class="status" aria-live="polite"></p>
+<a id="save" class="button" hidden>Save the signed PDF</a>
+<div id="report"></div>
 <h2>What it adds, and what it leaves alone</h2>
-<p>Place and date on the left, a label and a signature rule on the right, at the foot of the last page. Nothing else is touched: layout, fonts and pagination stay exactly as they were, and the block is anchored to the document's own margins, read from the file rather than assumed.</p><p>Afterwards it re-extracts the text and checks two things: that the date is actually readable by a parser, and that no line of the original disappeared. It says so if either fails.</p>
+<p>Place and date on the left, a label and a rule on the right, at the foot of the last page. Layout, fonts and pagination stay exactly as they were. The block lines up with the document's own margins, which are read out of the file rather than assumed, because a signature block a few millimetres off the text above it is one of the things that makes a document look tampered with.</p><p>Afterwards the finished file gets opened again and two things are checked: that the date is readable by a parser, and that no line of the original went missing. Both are reported under the download button.</p><p>A cut-out signature goes on the rule at the proportions of the image. <a href="../extract-signature/">The signature extractor</a> makes one from a photograph.</p>
 <h2>Two things that look reasonable and do not work</h2>
-<p><strong>Reusing the font embedded in the PDF</strong> so the addition blends in. Embedded fonts are subsets: they carry only the glyphs that document needed, with their own internal encoding. Re-inserting one produces text that displays on screen but extracts as null bytes — the PDF looks right and a parser reads no date at all. Helvetica is used instead.</p><p><strong>Replacing placeholders inside the PDF.</strong> Redaction deletes every piece of text whose box touches the chosen area, and those boxes are inflated by line spacing: removing a heading also removed the contact line below it, with no error. Placeholders belong in the source document; this tool only reports them.</p>
-<h2>Run it</h2>
-<h2>Run it</h2>
+<p><strong>Reusing the font already embedded in the PDF</strong>, so the addition blends in. Embedded fonts are subsets: they carry only the glyphs that document happened to need, with their own internal encoding. Re-inserting one gives you text that displays perfectly on screen and extracts as null bytes. The PDF looks right and a parser reads no date at all. Helvetica is used instead.</p><p><strong>Replacing placeholders inside the PDF.</strong> Redaction deletes every piece of text whose box touches the chosen area, and those boxes are inflated by line spacing: removing a heading took the contact line below it as well, with no error and no warning. Placeholders belong in the source document. This tool only tells you they are still there.</p>
+<h2>The same block from a terminal</h2>
+<p>The browser tool above is the same algorithm. Use the script when you
+have forty files to get through, or when you want it inside a pipeline.</p>
 <pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
 python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
 .venv/bin/python tools/add_date_signature.py document.pdf --place Turin</code></pre>
-<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+<p class="caveat">The virtual environment is not fussiness. On Debian and Ubuntu the
 system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
-because the operating system's own tooling depends on those packages.</p><p><code>--signature signature.png</code> lays a real signature on the rule. <code>--locale it --label Firma</code> switches the date and the label to Italian. If the last page is full the block goes onto a new sheet, and it tells you, rather than quietly making a one-page document into two.</p>
+because the operating system's own tooling depends on those packages.</p><p><code>--signature signature.png</code> lays a real signature on the rule. <code>--locale it --label Firma</code> switches the date and the label to Italian.</p>
 <footer>
-<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+<p><a href="../">All tools</a> &middot; <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> &middot; MIT licence</p>
 </footer></div></body></html>
+<script type="module" src="../app/sign-pdf.js"></script>

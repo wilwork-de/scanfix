@@ -2,36 +2,67 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Photo to PDF, offline — no upload, no account</title>
-<meta name="description" content="Turn photos of a document into a light A4 PDF, offline on your own machine. Fixes rotation and size. Nothing is uploaded.">
+<title>Photo to PDF in your browser - no upload, no account</title>
+<meta name="description" content="Turn photos of a document into a light A4 PDF, in your browser. Fixes the rotation and the size. Nothing is uploaded.">
 <link rel="canonical" href="https://wilwork-de.github.io/scanfix/photo-to-pdf/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://wilwork-de.github.io/scanfix/photo-to-pdf/">
-<meta property="og:title" content="Photo to PDF, offline — no upload, no account">
-<meta property="og:description" content="Turn photos of a document into a light A4 PDF, offline on your own machine. Fixes rotation and size. Nothing is uploaded.">
+<meta property="og:title" content="Photo to PDF in your browser - no upload, no account">
+<meta property="og:description" content="Turn photos of a document into a light A4 PDF, in your browser. Fixes the rotation and the size. Nothing is uploaded.">
 <meta name="twitter:card" content="summary">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../style.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Turn photos into an A4 PDF", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/photo-to-pdf/", "description": "Turn photos of a document into a light A4 PDF, offline on your own machine. Fixes rotation and size. Nothing is uploaded.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Turn photos into an A4 PDF", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/photo-to-pdf/", "description": "Turn photos of a document into a light A4 PDF, in your browser. Fixes the rotation and the size. Nothing is uploaded.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
 </head>
 <body>
 <div class="sheet">
 <nav class="top"><a href="../">scanfix</a> / Photo to PDF</nav>
 <h1>Turn photos into an A4 PDF</h1>
 <p class="tagline">For when you printed something, signed it, photographed it, and the form wants a PDF.</p>
-<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. The tool runs on your own machine, from your terminal: the document never leaves it and no server is involved.</span></div>
-<h2>What it does</h2>
-<p>Straight conversion, one photo per page. It fixes the rotation from the EXIF data — phone photos are almost always rotated in the metadata rather than in the pixels, so some viewers turn them and others do not, and your document arrives lying on its side. Then greyscale, which costs nothing on a document and cuts about two thirds of the weight, a flattened white background, and A4 layout.</p><p>If the result overshoots the size cap it steps the resolution down and tries again, rather than handing you a file the upload form will reject. For heavier correction — shadows, perspective — use <a href="../clean-scan/">the scan cleanup</a> instead.</p>
+<div class="privacy-badge"><span aria-hidden="true">&#128274;</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. This tool runs inside your browser, on your own machine, and the page is served with a policy that forbids it to open a network connection at all. Your file has nowhere to go.</span></div>
+<p class="lead">The portal only accepts PDF and you have three photos on your phone. Drop them below, in the order you want the pages. You get one A4 PDF, right way up, small enough to upload.</p>
+<div id="drop" role="button" tabindex="0" aria-label="Choose photos">
+  <strong>Drop your photos here</strong>
+  <span>or click to choose them. One photo per page, in order.</span>
+  <input type="file" id="picker" accept="image/*" multiple>
+</div>
+<div id="listing" class="listing"></div>
+<div class="controls">
+  <label><input type="checkbox" id="flatten" checked> Flatten the paper to white</label>
+  <label><input type="checkbox" id="colour"> Keep the colour</label>
+  <label>Resolution
+    <select id="dpi">
+      <option value="150">150 dpi</option>
+      <option value="200" selected>200 dpi</option>
+      <option value="300">300 dpi</option>
+    </select></label>
+  <label>Size cap
+    <select id="cap">
+      <option value="1">1 MB</option>
+      <option value="2" selected>2 MB</option>
+      <option value="5">5 MB</option>
+    </select></label>
+  <button type="button" id="clear" class="link" hidden>Start again</button>
+</div>
+<p id="state" class="status" aria-live="polite"></p>
+<a id="save" class="button" hidden>Save the PDF</a>
+<div id="notes" class="notes"></div>
+<h2>What it does to your photos</h2>
+<p>It rotates them properly first. Phone photos are almost always rotated in the metadata rather than in the pixels, which is why the same picture looks upright in your gallery and lies on its side once it reaches somebody else's screen.</p><p>Then greyscale, which costs nothing on a document and cuts about two thirds of the weight, a flattened white background so the paper does not stay beige, and A4 layout with a margin. If the result comes out over your size cap it steps the resolution down and tries again, rather than handing you a file the upload form will reject.</p><p>This is the straight conversion. For shadows and perspective use <a href="../clean-scan/">the scan cleanup</a> instead.</p>
 <h2>One thing not to do</h2>
-<p>Do not rename <code>photo.jpg</code> to <code>photo.pdf</code>. The name does not change the contents: it is still a JPEG, and a portal rejects it by reading the first bytes, which say <code>JFIF</code> rather than <code>%PDF</code>. Obvious written down, extremely common in practice.</p>
-<h2>Run it</h2>
-<h2>Run it</h2>
+<p>Do not rename <code>photo.jpg</code> to <code>photo.pdf</code>. The name does not change the contents. It is still a JPEG, and the portal rejects it by reading the first few bytes, which say <code>JFIF</code> where they should say <code>%PDF</code>. Obvious written down. Extremely common in practice.</p>
+<h2>The same conversion from a terminal</h2>
+<p>The browser tool above is the same algorithm. Use the script when you
+have forty files to get through, or when you want it inside a pipeline.</p>
 <pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
 python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
 .venv/bin/python tools/photo_to_pdf.py photo.jpg -o document.pdf</code></pre>
-<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+<p class="caveat">The virtual environment is not fussiness. On Debian and Ubuntu the
 system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
 because the operating system's own tooling depends on those packages.</p><p>Pass several images to get several pages, in the order you list them. <code>--max-mb 1.5</code> tightens the size cap.</p>
 <footer>
-<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+<p><a href="../">All tools</a> &middot; <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> &middot; MIT licence</p>
 </footer></div></body></html>
+<script type="module" src="../app/photo-to-pdf.js"></script>

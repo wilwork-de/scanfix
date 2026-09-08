@@ -2,13 +2,14 @@
   "name": "scanfix-tests",
   "private": true,
   "type": "module",
+  "version": "0.2.0",
+  "description": "Test harness for the scanfix browser tools",
   "dependencies": {
     "pdfjs-dist": "^4.10.38"
   },
-  "version": "0.1.0",
-  "description": "Test harness for the scanfix redaction checker",
   "scripts": {
-    "test": "node tests/test_js.mjs"
+    "test": "node tests/test_js.mjs && node tests/test_imaging.mjs && node tests/test_pdf.mjs",
+    "test:browser": "node tests/test_browser.mjs"
   },
   "license": "MIT"
 }

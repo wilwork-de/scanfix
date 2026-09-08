@@ -2,103 +2,47 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PDF redaction checker — runs in your browser, no upload</title>
-<meta name="description" content="Free PDF redaction checker that runs in your browser — nothing is uploaded. Finds text still readable under black boxes.">
+<title>PDF redaction checker - runs in your browser, no upload</title>
+<meta name="description" content="Free PDF redaction checker that runs in your browser. Nothing is uploaded. Finds text still readable under black boxes.">
 <link rel="canonical" href="https://wilwork-de.github.io/scanfix/redaction-checker/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://wilwork-de.github.io/scanfix/redaction-checker/">
-<meta property="og:title" content="PDF redaction checker — runs in your browser, no upload">
-<meta property="og:description" content="Free PDF redaction checker that runs in your browser — nothing is uploaded. Finds text still readable under black boxes.">
+<meta property="og:title" content="PDF redaction checker - runs in your browser, no upload">
+<meta property="og:description" content="Free PDF redaction checker that runs in your browser. Nothing is uploaded. Finds text still readable under black boxes.">
 <meta name="twitter:card" content="summary">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../style.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Is your PDF really redacted?", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/redaction-checker/", "description": "Free PDF redaction checker that runs in your browser \u2014 nothing is uploaded. Finds text still readable under black boxes.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Is your PDF really redacted?", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/redaction-checker/", "description": "Free PDF redaction checker that runs in your browser. Nothing is uploaded. Finds text still readable under black boxes.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
 </head>
 <body>
 <div class="sheet">
 <nav class="top"><a href="../">scanfix</a> / Redaction checker</nav>
 <h1>Is your PDF really redacted?</h1>
-<p class="tagline">Find out whether the black boxes on a PDF actually removed the text, or merely covered it.</p>
-<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. This page's check runs entirely inside your browser, and the command-line tools run on your own machine. The file never reaches a server — not ours, not anyone's.</span></div>
+<p class="tagline">Find out whether those black boxes removed the text or only covered it up.</p>
+<div class="privacy-badge"><span aria-hidden="true">&#128274;</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. This tool runs inside your browser, on your own machine, and the page is served with a policy that forbids it to open a network connection at all. Your file has nowhere to go.</span></div>
+<p class="lead">You blacked out a name in a document before sending it on. Or one landed in your inbox with rectangles over the sensitive parts, and you want to know whether they hold. Drop it below.</p>
 <div id="drop" role="button" tabindex="0" aria-label="Choose a PDF to check">
   <strong>Drop a PDF here</strong>
   <span>or click to choose one</span>
   <input type="file" id="picker" accept="application/pdf,.pdf">
 </div>
 <div id="result" aria-live="polite"></div>
-<h2>Why a black box is not a redaction</h2>
-<p>A PDF is not a flattened image: it is a stack of objects drawn one over another. Putting a black rectangle over a name <strong>adds</strong> an object, it does not remove one. The name stays in the file, underneath, and comes back by selecting it with the mouse or with three lines of code. This is how court filings and government documents have leaked while their authors believed them censored, and it holds just the same for rectangles drawn in Word, for highlighter annotations, and for online tools that promise to censor a PDF for you.</p>
-<h2>How to redact for real</h2>
-<ol><li><strong>Remove, do not cover.</strong> A true redaction deletes the content. In PyMuPDF: <code>page.add_redact_annot(rect)</code> then <code>page.apply_redactions()</code>.</li><li><strong>Or flatten it.</strong> Render the page to an image, cover, re-export. Crude, but it rebuilds the pixels from scratch.</li><li><strong>Check the finished file.</strong> Not optional — it is the step everyone who has published a badly censored document skipped.</li></ol><p class="caveat">One stated limit: a filled rectangle over text is not always a censorship. A coloured header band with white type on it, seen from the file, is exactly the same thing. That is why this tool does not return a bare verdict but shows <em>what</em> it found underneath: an account number is a leak, the document's own title is graphics. Telling them apart automatically would mean guessing at intent.</p>
+<h2>Why a black box is often not a redaction</h2>
+<p>A PDF is a stack of objects drawn one over another, not a flat picture. Drawing a black rectangle over a name adds an object. It does not delete one. The name is still in the file, underneath, and it comes back by selecting it with a mouse or with three lines of code.</p><p>Court filings and government documents have leaked this way while the people who published them believed the text was gone. The same trap catches rectangles drawn in Word, highlighter annotations, and the online tools that offer to censor a PDF for you.</p>
+<h2>How to redact so that it holds</h2>
+<ol><li><strong>Remove the content instead of covering it.</strong> In PyMuPDF: <code>page.add_redact_annot(rect)</code>, then <code>page.apply_redactions()</code>.</li><li><strong>Or flatten the page.</strong> Render it to an image, cover, re-export. Crude, and it works, because the pixels get rebuilt from scratch.</li><li><strong>Then check the finished file.</strong> This is the step everyone who has ever published a badly censored document skipped.</li></ol><p class="caveat">One thing the checker cannot decide for you. A filled rectangle over text is not always a censorship: a coloured header band with white type on it looks identical from inside the file. That is why you get the text it found rather than a bare verdict. An account number is a leak. The document's own title is graphics. Telling those apart automatically would mean guessing at what the person laying out the page meant.</p>
 <h2>The same check from a terminal</h2>
-<p>Exits with code <code>1</code> when it finds a possible leak, so it drops into a pipeline or a pre-commit hook.</p><h2>Run it</h2>
+<p>It exits with code <code>1</code> when it finds a possible leak, so it drops into a pipeline or a pre-commit hook.</p><p>The browser tool above is the same algorithm. Use the script when you
+have forty files to get through, or when you want it inside a pipeline.</p>
 <pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
 python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
 .venv/bin/python tools/check_redaction.py document.pdf</code></pre>
-<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+<p class="caveat">The virtual environment is not fussiness. On Debian and Ubuntu the
 system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
 because the operating system's own tooling depends on those packages.</p>
 <footer>
-<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+<p><a href="../">All tools</a> &middot; <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> &middot; MIT licence</p>
 </footer></div></body></html>
-<script type="module">
-import * as pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
-import { analyseDocument } from "../redaction-check.js";
-
-pdfjs.GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
-
-const drop = document.getElementById("drop");
-const picker = document.getElementById("picker");
-const result = document.getElementById("result");
-const esc = s => s.replace(/[&<>"']/g, c =>
-  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-
-drop.addEventListener("click", () => picker.click());
-drop.addEventListener("keydown", e => {
-  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); picker.click(); }
-});
-picker.addEventListener("change", e => { if (e.target.files[0]) check(e.target.files[0]); });
-for (const t of ["dragenter", "dragover"])
-  drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); });
-for (const t of ["dragleave", "drop"])
-  drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); });
-drop.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) check(f); });
-
-async function check(file) {
-  result.innerHTML = `<p style="color:var(--muted)">Analysing <b>${esc(file.name)}</b>…</p>`;
-  try {
-    const data = new Uint8Array(await file.arrayBuffer());
-    const pdf = await pdfjs.getDocument({ data, isEvalSupported: false }).promise;
-    render(file.name, await analyseDocument(pdf, pdfjs.OPS));
-    await pdf.destroy();
-  } catch (err) {
-    result.innerHTML = `<div class="verdict suspect"><h3>Could not read it</h3>
-      <p>${esc(String(err && err.message || err))}</p></div>`;
-  }
-}
-
-function render(name, r) {
-  if (r.verdict === "CLEAN") {
-    result.innerHTML = `<div class="verdict clean"><h3>No suspicious covers</h3>
-      <p>${esc(name)} — ${r.totalPages} pages. No opaque shape sits over still-extractable
-      content. Note this says the document does not have <em>this</em> defect, not that it
-      holds no confidential data in plain sight.</p></div>`;
-    return;
-  }
-  const count = r.pages.reduce((n, p) => n + p.findings.length, 0);
-  let html = `<div class="verdict suspect"><h3>Redaction is not reliable</h3>
-    <p>${esc(name)} — ${count} opaque shapes over still-extractable content.
-    Below is what reads back from under the covers.</p></div>`;
-  for (const p of r.pages) for (const f of p.findings) {
-    html += `<div class="finding"><div class="where">page ${p.page} · ${esc(f.source)}
-      · box [${f.box.join(", ")}]</div>`;
-    if (f.textUnderneath) html += `<div class="recovered">${esc(f.textUnderneath)}</div>`;
-    if (f.overImage) html += `<p class="image-note" style="margin:${f.textUnderneath ? "8px" : "0"} 0 0">
-      Covers an image: the content is recovered by extracting the embedded image,
-      which nothing drawn on top of it modifies.</p>`;
-    html += `</div>`;
-  }
-  result.innerHTML = html;
-}
-</script>
+<script type="module" src="../app/redaction-checker.js"></script>

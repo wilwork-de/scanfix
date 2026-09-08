@@ -2,34 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>scanfix — private PDF tools that never upload your file</title>
-<meta name="description" content="Free PDF tools that run offline or in your browser: redaction checker, signature extractor, scan cleanup, photo to PDF. Your document never reaches a server.">
+<title>scanfix - PDF tools that never upload your file</title>
+<meta name="description" content="Free PDF tools that run entirely in your browser: redaction checker, signature extractor, scan cleanup, photo to PDF, CV generator. Your document never reaches a server.">
 <link rel="canonical" href="https://wilwork-de.github.io/scanfix/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://wilwork-de.github.io/scanfix/">
-<meta property="og:title" content="scanfix — private PDF tools that never upload your file">
-<meta property="og:description" content="Free PDF tools that run offline or in your browser: redaction checker, signature extractor, scan cleanup, photo to PDF. Your document never reaches a server.">
+<meta property="og:title" content="scanfix - PDF tools that never upload your file">
+<meta property="og:description" content="Free PDF tools that run entirely in your browser: redaction checker, signature extractor, scan cleanup, photo to PDF, CV generator. Your document never reaches a server.">
 <meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "PDF tools that never upload your file", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/", "description": "Free PDF tools that run offline or in your browser: redaction checker, signature extractor, scan cleanup, photo to PDF. Your document never reaches a server.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "PDF tools that never upload your file", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/", "description": "Free PDF tools that run entirely in your browser: redaction checker, signature extractor, scan cleanup, photo to PDF, CV generator. Your document never reaches a server.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
 </head>
 <body>
 <div class="sheet">
 <h1>PDF tools that never upload your file</h1>
-<p class="tagline">Six small tools for documents. Every one of them works without sending your file anywhere.</p>
-<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Every tool here runs either inside your browser or on your own machine from a terminal. There is no upload step, no account and no server to trust — which matters most for the two documents you would least want to hand over: your signature, and a file whose redaction might have failed.</span></div>
-<div class="cards"><a class="card" href="redaction-checker/"><b>Check a PDF&#x27;s redaction</b><span>Finds text still readable under black boxes.</span><span class="runs">Runs in your browser</span></a>
-<a class="card" href="extract-signature/"><b>Extract a signature</b><span>Photo of your signature to a transparent PNG.</span><span class="runs">Runs on your machine</span></a>
-<a class="card" href="clean-scan/"><b>Clean up a scan</b><span>Remove shadows, straighten, fit to A4.</span><span class="runs">Runs on your machine</span></a>
-<a class="card" href="sign-pdf/"><b>Add a date and signature</b><span>Place, date and a signature rule at the foot.</span><span class="runs">Runs on your machine</span></a>
-<a class="card" href="photo-to-pdf/"><b>Photos to a PDF</b><span>Light A4 PDF, right way up, under a size cap.</span><span class="runs">Runs on your machine</span></a>
-<a class="card" href="make-cv/"><b>Generate a CV</b><span>One page, date and signature block in place.</span><span class="runs">Runs on your machine</span></a></div>
-<h2>Why it is built this way</h2>
-<p>Most tools that do these jobs ask you to upload the file first. For a signature, or for a document you are checking precisely because its censorship may have failed, that is the wrong shape: you would be handing a stranger the exact thing you are trying to protect.</p><p>So the redaction check runs in the browser through pdf.js, and the rest are Python scripts you run yourself. You can disconnect from the network after this page loads and the checker still works.</p>
-<h2>Install the command-line tools</h2>
-<pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
+<p class="tagline">Six small tools for the paperwork nobody enjoys. Not one of them sends your document anywhere.</p>
+<div class="privacy-badge"><span aria-hidden="true">&#128274;</span><span class="body"><b>Private by construction.</b> Every tool here runs inside your browser. There is no upload step, no account, and no server holding your file for the afternoon. That matters most for the two documents you would least want to hand to a stranger: your signature, and a file whose redaction might have failed.</span></div>
+<div class="cards"><a class="card" href="redaction-checker/"><b>Check a PDF&#x27;s redaction</b><span>Reads back whatever is still under the black boxes.</span><span class="runs">Runs in your browser</span></a>
+<a class="card" href="extract-signature/"><b>Extract a signature</b><span>Photo of your signature to a transparent PNG.</span><span class="runs">Runs in your browser</span></a>
+<a class="card" href="clean-scan/"><b>Clean up a scan</b><span>Shadow gone, page straight, fitted to A4.</span><span class="runs">Runs in your browser</span></a>
+<a class="card" href="sign-pdf/"><b>Add a date and signature</b><span>Place, date and a signature rule at the foot.</span><span class="runs">Runs in your browser</span></a>
+<a class="card" href="photo-to-pdf/"><b>Photos to a PDF</b><span>Light A4 PDF, right way up, under a size cap.</span><span class="runs">Runs in your browser</span></a>
+<a class="card" href="make-cv/"><b>Generate a CV</b><span>One page, date and signature block in place.</span><span class="runs">Runs in your browser</span></a></div>
+<h2>Why it works this way</h2>
+<p>Most tools that do these jobs ask you to upload first. Think about what that means for a signature, or for a document you are checking precisely because its censorship may have failed. You would be handing over the exact thing you are trying to protect, to a company whose retention policy you have not read.</p><p>So the work happens here, in the tab. Each page carries its own copy of pdf.js and pdf-lib and loads nothing from anywhere else, and each one is served with a Content-Security-Policy that sets <code>connect-src&nbsp;'none'</code>. A privacy policy is a promise. This is the browser refusing, on your behalf, to let the page open a connection at all.</p>
+<h2>Try breaking it</h2>
+<p>Open any tool, turn off your wi-fi, then use it. It keeps working. Or leave the network tab of the developer console open while you convert a file and watch it stay empty.</p>
+<h2>The same tools from a terminal</h2>
+<p>Every one of these started as a Python script, and the scripts are still here. Reach for them when you have a folder of files rather than one.</p><pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
 python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt</code></pre>
 <footer>
-<p><a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+<p><a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> &middot; MIT licence</p>
 </footer></div></body></html>
