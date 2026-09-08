@@ -3,265 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>scanfix — PDF document tools</title>
-<meta name="description" content="Check whether a PDF's redaction actually holds. Runs in your browser: the document is never uploaded anywhere.">
-<style>
-  :root {
-    --bg: #fbfaf8; --card: #ffffff; --ink: #1a202c; --muted: #4a5568;
-    --faint: #a0aec0; --rule: #e2e8f0; --accent: #2b6cb0;
-    --alert: #c53030; --alert-bg: #fff5f5; --good: #276749; --good-bg: #f0fff4;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #14171c; --card: #1c2027; --ink: #e8eaed; --muted: #a8b0ba;
-      --faint: #6b7684; --rule: #2c323b; --accent: #63a4e0;
-      --alert: #fc8181; --alert-bg: #2a1b1b; --good: #9ae6b4; --good-bg: #1a2a1f;
-    }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-  .sheet { max-width: 780px; margin: 0 auto; padding: 40px 20px 72px; }
-  h1 { font-size: 30px; letter-spacing: -.02em; margin: 0 0 6px; }
-  h2 { font-size: 19px; margin: 44px 0 12px; letter-spacing: -.01em; }
-  h3 { font-size: 15px; margin: 26px 0 6px; }
-  p { margin: 0 0 14px; }
-  .tagline { color: var(--muted); font-size: 16px; margin-bottom: 30px; }
-  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
-  code { background: var(--rule); padding: 1px 5px; border-radius: 4px; }
-  pre {
-    background: var(--card); border: 1px solid var(--rule); border-radius: 8px;
-    padding: 12px 14px; overflow-x: auto; margin: 0 0 14px;
-  }
-  pre code { background: none; padding: 0; }
-  a { color: var(--accent); }
-
-  #drop {
-    border: 2px dashed var(--rule); border-radius: 12px; background: var(--card);
-    padding: 34px 20px; text-align: center; cursor: pointer;
-    transition: border-color .15s, background .15s;
-  }
-  #drop:hover, #drop.over { border-color: var(--accent); background: var(--bg); }
-  #drop strong { display: block; font-size: 16px; margin-bottom: 4px; }
-  #drop span { color: var(--muted); font-size: 13px; }
-  #picker { display: none; }
-
-  .privacy {
-    margin-top: 12px; font-size: 13px; color: var(--muted);
-    display: flex; gap: 8px; align-items: flex-start;
-  }
-  .privacy b { color: var(--ink); font-weight: 600; }
-
-  #result { margin-top: 24px; }
-  .verdict { border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; border: 1px solid; }
-  .verdict.suspect { background: var(--alert-bg); border-color: var(--alert); }
-  .verdict.clean { background: var(--good-bg); border-color: var(--good); }
-  .verdict h3 { margin: 0 0 4px; font-size: 16px; }
-  .verdict.suspect h3 { color: var(--alert); }
-  .verdict.clean h3 { color: var(--good); }
-  .verdict p { margin: 0; font-size: 14px; color: var(--muted); }
-
-  .finding {
-    border: 1px solid var(--rule); border-left: 3px solid var(--alert);
-    border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; background: var(--card);
-  }
-  .finding .where { font-size: 12px; color: var(--faint); margin-bottom: 6px; }
-  .recovered {
-    background: var(--alert-bg); border-radius: 6px; padding: 8px 10px;
-    font-family: ui-monospace, monospace; font-size: 13px; word-break: break-word;
-  }
-  .image-note { font-size: 13px; color: var(--muted); }
-
-  table { border-collapse: collapse; width: 100%; font-size: 14px; margin-bottom: 14px; }
-  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
-  th { font-weight: 600; color: var(--muted); font-size: 13px; }
-  .caveat {
-    border-left: 3px solid var(--faint); padding: 2px 0 2px 14px;
-    color: var(--muted); font-size: 14px; margin: 0 0 14px;
-  }
-  footer {
-    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule);
-    font-size: 13px; color: var(--faint);
-  }
-</style>
+<title>scanfix — private PDF tools that never upload your file</title>
+<meta name="description" content="Free PDF tools that run offline or in your browser: redaction checker, signature extractor, scan cleanup, photo to PDF. Your document never reaches a server.">
+<link rel="canonical" href="https://wilwork-de.github.io/scanfix/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wilwork-de.github.io/scanfix/">
+<meta property="og:title" content="scanfix — private PDF tools that never upload your file">
+<meta property="og:description" content="Free PDF tools that run offline or in your browser: redaction checker, signature extractor, scan cleanup, photo to PDF. Your document never reaches a server.">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "PDF tools that never upload your file", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/", "description": "Free PDF tools that run offline or in your browser: redaction checker, signature extractor, scan cleanup, photo to PDF. Your document never reaches a server.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
 </head>
 <body>
 <div class="sheet">
-
-  <h1>scanfix</h1>
-  <p class="tagline">
-    Tools for putting PDF documents back in order: clean up a photo of a sheet of paper,
-    add a date and signature, and check whether a redaction actually holds.
-  </p>
-
-  <h2>Is your PDF really redacted?</h2>
-  <p>
-    A PDF is not a flattened image: it is a stack of objects drawn one over another.
-    Putting a black rectangle over a name <strong>adds</strong> an object, it does not
-    remove one. The name stays in the file, underneath, and comes back by selecting it
-    with the mouse or with three lines of code. This is how court filings and government
-    documents have leaked while their authors believed them censored.
-  </p>
-
-  <div id="drop" role="button" tabindex="0" aria-label="Choose a PDF to check">
-    <strong>Drop a PDF here</strong>
-    <span>or click to choose one</span>
-    <input type="file" id="picker" accept="application/pdf,.pdf">
-  </div>
-
-  <p class="privacy">
-    <span aria-hidden="true">🔒</span>
-    <span><b>The document is never uploaded anywhere.</b> The check runs entirely in your
-    browser: the file does not leave your computer and no server sees it. Disconnect from
-    the network after loading this page and it still works.</span>
-  </p>
-
-  <div id="result" aria-live="polite"></div>
-
-  <h2>How to redact for real</h2>
-  <p>Three steps, and the third is not optional.</p>
-  <ol>
-    <li><strong>Remove, do not cover.</strong> A true redaction deletes the content.
-      In PyMuPDF: <code>page.add_redact_annot(rect)</code> followed by
-      <code>page.apply_redactions()</code>.</li>
-    <li><strong>Or flatten it.</strong> Render the page to an image, cover, re-export.
-      Crude, but effective: it rebuilds the pixels from scratch.</li>
-    <li><strong>Check the finished file</strong>, by reopening it and re-extracting text
-      and images. With this page, or with the command-line script.</li>
-  </ol>
-
-  <p class="caveat">
-    One stated limit: a filled rectangle over text is not always a censorship. A coloured
-    header band with white type on it, seen from the file, is exactly the same thing. That
-    is why this tool does not return a bare verdict but shows <em>what</em> it found
-    underneath: if it is a name or an account number it is a leak, if it is the title of
-    the document it is graphics. Telling them apart automatically would mean guessing at
-    intent.
-  </p>
-
-  <h2>The other tools</h2>
-  <p>Python command-line scripts, in the <code>tools/</code> directory of the repository.</p>
-  <table>
-    <thead><tr><th>Tool</th><th>What it does</th></tr></thead>
-    <tbody>
-      <tr><td><code>check_redaction.py</code></td>
-        <td>The same check as this page, from a terminal. Exits with code 1 when it finds
-            a possible leak, so it drops into a pipeline or a pre-commit hook.</td></tr>
-      <tr><td><code>clean_scan.py</code></td>
-        <td>From a photo of a sheet to a clean scan: removes the shadow of uneven
-            lighting, straightens the perspective, fits the result to A4.</td></tr>
-      <tr><td><code>extract_signature.py</code></td>
-        <td>Cuts a signature out of a photograph and saves it as a transparent PNG, to
-            lay on a digital document.</td></tr>
-      <tr><td><code>add_date_signature.py</code></td>
-        <td>Adds a place, a date and a signature rule to the foot of an existing PDF,
-            without rebuilding it and without touching the rest.</td></tr>
-      <tr><td><code>photo_to_pdf.py</code></td>
-        <td>From one or more photos to a light A4 PDF: fixes the orientation, converts to
-            greyscale, compresses under a size cap.</td></tr>
-      <tr><td><code>make_cv.py</code></td>
-        <td>Generates a one-page CV as a PDF from a data dictionary, in English or
-            Italian, with the date and signature block already in place.</td></tr>
-    </tbody>
-  </table>
-
-  <h3>Install</h3>
+<h1>PDF tools that never upload your file</h1>
+<p class="tagline">Six small tools for documents. Every one of them works without sending your file anywhere.</p>
+<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Every tool here runs either inside your browser or on your own machine from a terminal. There is no upload step, no account and no server to trust — which matters most for the two documents you would least want to hand over: your signature, and a file whose redaction might have failed.</span></div>
+<div class="cards"><a class="card" href="redaction-checker/"><b>Check a PDF&#x27;s redaction</b><span>Finds text still readable under black boxes.</span><span class="runs">Runs in your browser</span></a>
+<a class="card" href="extract-signature/"><b>Extract a signature</b><span>Photo of your signature to a transparent PNG.</span><span class="runs">Runs on your machine</span></a>
+<a class="card" href="clean-scan/"><b>Clean up a scan</b><span>Remove shadows, straighten, fit to A4.</span><span class="runs">Runs on your machine</span></a>
+<a class="card" href="sign-pdf/"><b>Add a date and signature</b><span>Place, date and a signature rule at the foot.</span><span class="runs">Runs on your machine</span></a>
+<a class="card" href="photo-to-pdf/"><b>Photos to a PDF</b><span>Light A4 PDF, right way up, under a size cap.</span><span class="runs">Runs on your machine</span></a>
+<a class="card" href="make-cv/"><b>Generate a CV</b><span>One page, date and signature block in place.</span><span class="runs">Runs on your machine</span></a></div>
+<h2>Why it is built this way</h2>
+<p>Most tools that do these jobs ask you to upload the file first. For a signature, or for a document you are checking precisely because its censorship may have failed, that is the wrong shape: you would be handing a stranger the exact thing you are trying to protect.</p><p>So the redaction check runs in the browser through pdf.js, and the rest are Python scripts you run yourself. You can disconnect from the network after this page loads and the checker still works.</p>
+<h2>Install the command-line tools</h2>
 <pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
-python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
-.venv/bin/python tools/check_redaction.py document.pdf</code></pre>
-  <p class="caveat">
-    The virtual environment is not fussiness: on Debian and Ubuntu the system Python is
-    protected (PEP 668) and a direct <code>pip install</code> is refused, because the
-    operating system's own tooling depends on those packages.
-  </p>
-
-  <footer>
-    <p>
-      <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence ·
-      The check on this page is the same file the repository's tests run against.
-    </p>
-  </footer>
-</div>
-
-<script type="module">
-import * as pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
-import { analyseDocument } from "./redaction-check.js";
-
-pdfjs.GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
-
-const drop = document.getElementById("drop");
-const picker = document.getElementById("picker");
-const result = document.getElementById("result");
-
-const esc = s => s.replace(/[&<>"']/g, c =>
-  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-
-drop.addEventListener("click", () => picker.click());
-drop.addEventListener("keydown", e => {
-  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); picker.click(); }
-});
-picker.addEventListener("change", e => { if (e.target.files[0]) check(e.target.files[0]); });
-
-for (const type of ["dragenter", "dragover"]) {
-  drop.addEventListener(type, e => { e.preventDefault(); drop.classList.add("over"); });
-}
-for (const type of ["dragleave", "drop"]) {
-  drop.addEventListener(type, e => { e.preventDefault(); drop.classList.remove("over"); });
-}
-drop.addEventListener("drop", e => {
-  const f = e.dataTransfer.files[0];
-  if (f) check(f);
-});
-
-async function check(file) {
-  result.innerHTML = `<p style="color:var(--muted)">Analysing <b>${esc(file.name)}</b>…</p>`;
-  try {
-    const data = new Uint8Array(await file.arrayBuffer());
-    const pdf = await pdfjs.getDocument({ data, isEvalSupported: false }).promise;
-    render(file.name, await analyseDocument(pdf, pdfjs.OPS));
-    await pdf.destroy();
-  } catch (err) {
-    result.innerHTML = `<div class="verdict suspect"><h3>Could not read it</h3>
-      <p>${esc(String(err && err.message || err))}</p></div>`;
-  }
-}
-
-function render(name, r) {
-  if (r.verdict === "CLEAN") {
-    result.innerHTML = `<div class="verdict clean">
-      <h3>No suspicious covers</h3>
-      <p>${esc(name)} — ${r.totalPages} pages. No opaque shape sits over still-extractable
-      content. Note this says the document does not have <em>this</em> defect, not that it
-      holds no confidential data in plain sight.</p>
-    </div>`;
-    return;
-  }
-
-  const count = r.pages.reduce((n, p) => n + p.findings.length, 0);
-  let html = `<div class="verdict suspect">
-    <h3>Redaction is not reliable</h3>
-    <p>${esc(name)} — ${count} opaque shapes over still-extractable content.
-    Below is what reads back from under the covers.</p>
-  </div>`;
-
-  for (const p of r.pages) {
-    for (const f of p.findings) {
-      html += `<div class="finding">
-        <div class="where">page ${p.page} · ${esc(f.source)} · box [${f.box.join(", ")}]</div>`;
-      if (f.textUnderneath) html += `<div class="recovered">${esc(f.textUnderneath)}</div>`;
-      if (f.overImage) {
-        html += `<p class="image-note" style="margin:${f.textUnderneath ? "8px" : "0"} 0 0">
-          Covers an image: the content is recovered by extracting the embedded image,
-          which nothing drawn on top of it modifies.</p>`;
-      }
-      html += `</div>`;
-    }
-  }
-  result.innerHTML = html;
-}
-</script>
-</body>
-</html>
+python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt</code></pre>
+<footer>
+<p><a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+</footer></div></body></html>

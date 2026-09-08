@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add a date and signature line to a PDF — offline, no upload</title>
+<meta name="description" content="Add a place, a date and a signature rule to the foot of an existing PDF without rebuilding it. Runs offline on your own machine; the document is never uploaded.">
+<link rel="canonical" href="https://wilwork-de.github.io/scanfix/sign-pdf/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wilwork-de.github.io/scanfix/sign-pdf/">
+<meta property="og:title" content="Add a date and signature line to a PDF — offline, no upload">
+<meta property="og:description" content="Add a place, a date and a signature rule to the foot of an existing PDF without rebuilding it. Runs offline on your own machine; the document is never uploaded.">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Add a date and signature line to a PDF", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/sign-pdf/", "description": "Add a place, a date and a signature rule to the foot of an existing PDF without rebuilding it. Runs offline on your own machine; the document is never uploaded.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+</head>
+<body>
+<div class="sheet">
+<nav class="top"><a href="../">scanfix</a> / Date and signature</nav>
+<h1>Add a date and signature line to a PDF</h1>
+<p class="tagline">Write only what is missing at the foot of a document you already have.</p>
+<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. The tool runs on your own machine, from your terminal: the document never leaves it and no server is involved.</span></div>
+<h2>What it adds, and what it leaves alone</h2>
+<p>Place and date on the left, a label and a signature rule on the right, at the foot of the last page. Nothing else is touched: layout, fonts and pagination stay exactly as they were, and the block is anchored to the document's own margins, read from the file rather than assumed.</p><p>Afterwards it re-extracts the text and checks two things: that the date is actually readable by a parser, and that no line of the original disappeared. It says so if either fails.</p>
+<h2>Two things that look reasonable and do not work</h2>
+<p><strong>Reusing the font embedded in the PDF</strong> so the addition blends in. Embedded fonts are subsets: they carry only the glyphs that document needed, with their own internal encoding. Re-inserting one produces text that displays on screen but extracts as null bytes — the PDF looks right and a parser reads no date at all. Helvetica is used instead.</p><p><strong>Replacing placeholders inside the PDF.</strong> Redaction deletes every piece of text whose box touches the chosen area, and those boxes are inflated by line spacing: removing a heading also removed the contact line below it, with no error. Placeholders belong in the source document; this tool only reports them.</p>
+<h2>Run it</h2>
+<h2>Run it</h2>
+<pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
+python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
+.venv/bin/python tools/add_date_signature.py document.pdf --place Turin</code></pre>
+<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
+because the operating system's own tooling depends on those packages.</p><p><code>--signature signature.png</code> lays a real signature on the rule. <code>--locale it --label Firma</code> switches the date and the label to Italian. If the last page is full the block goes onto a new sheet, and it tells you, rather than quietly making a one-page document into two.</p>
+<footer>
+<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+</footer></div></body></html>

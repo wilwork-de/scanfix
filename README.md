@@ -4,8 +4,21 @@ Command-line tools for putting PDF documents back in order: clean up a phone pho
 a sheet of paper, add a date and signature block, and **check whether a redaction
 actually holds**.
 
-**Live redaction checker:** https://wilwork-de.github.io/scanfix/ — it runs entirely
-in your browser, the document is never uploaded anywhere.
+**One page per tool, and nothing is uploaded by any of them:**
+<https://wilwork-de.github.io/scanfix/>
+
+| | |
+|---|---|
+| [Redaction checker](https://wilwork-de.github.io/scanfix/redaction-checker/) | runs in your browser |
+| [Signature extractor](https://wilwork-de.github.io/scanfix/extract-signature/) | runs on your machine |
+| [Scan cleanup](https://wilwork-de.github.io/scanfix/clean-scan/) | runs on your machine |
+| [Date and signature](https://wilwork-de.github.io/scanfix/sign-pdf/) | runs on your machine |
+| [Photo to PDF](https://wilwork-de.github.io/scanfix/photo-to-pdf/) | runs on your machine |
+| [CV generator](https://wilwork-de.github.io/scanfix/make-cv/) | runs on your machine |
+
+Most tools that do these jobs ask you to upload the file first. For a signature, or
+for a document you are checking precisely because its censorship may have failed,
+that is the wrong shape: it hands a stranger the exact thing you are protecting.
 
 ---
 
@@ -107,6 +120,13 @@ this repository.
 The two suites run against the same fixtures and must return the **same verdicts**:
 `docs/redaction-check.js`, the file the site loads, is the same one Node tests, not a
 parallel rewrite that can drift apart in silence.
+
+## The site
+
+`python3 build_site.py` regenerates `docs/` — one page per tool, plus the hub, a
+sitemap and robots.txt. It is a generator rather than seven hand-written HTML files
+because every page needs the same head (title, description, canonical, Open Graph,
+structured data), and hand-copied heads drift apart the moment one page is edited.
 
 ## Licence
 

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate a CV as a PDF — offline, English or Italian</title>
+<meta name="description" content="Build a one-page CV as a PDF, English or Italian, with the date and signature block in place. Offline — your details stay with you.">
+<link rel="canonical" href="https://wilwork-de.github.io/scanfix/make-cv/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wilwork-de.github.io/scanfix/make-cv/">
+<meta property="og:title" content="Generate a CV as a PDF — offline, English or Italian">
+<meta property="og:description" content="Build a one-page CV as a PDF, English or Italian, with the date and signature block in place. Offline — your details stay with you.">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Generate a CV as a PDF", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/make-cv/", "description": "Build a one-page CV as a PDF, English or Italian, with the date and signature block in place. Offline \u2014 your details stay with you.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+</head>
+<body>
+<div class="sheet">
+<nav class="top"><a href="../">scanfix</a> / CV generator</nav>
+<h1>Generate a CV as a PDF</h1>
+<p class="tagline">A one-page CV that comes out identical every time, with the date and signature block already where they belong.</p>
+<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. Your name, address and history stay in a file on your own machine — no form, no account, no server.</span></div>
+<h2>What it does</h2>
+<p>You fill in a dictionary at the top of the file and it builds a one-page PDF: the same output every time, text that stays selectable so an applicant tracking system can read it, and a date at the foot that updates itself.</p><p>Empty sections disappear rather than printing an empty heading, and the signature block goes where an institution expects it: the data-protection line first, then place and date on the left with the signature on the right.</p>
+<h2>English or Italian</h2>
+<p><code>--locale en</code> or <code>--locale it</code> switches the headings and the spelled-out date. The Italian version also carries the GDPR authorisation clause, which Italian employers and public bodies expect.</p><p class="caveat">A detail worth knowing if you write that clause yourself: do not cite <em>art. 13 del D.Lgs. 196/2003</em>. That article was repealed by D.Lgs. 101/2018, which harmonised the Italian Code with the GDPR — disclosure is now governed by articles 13 and 14 of the Regulation. Half the templates online still cite the repealed one.</p>
+<h2>Run it</h2>
+<h2>Run it</h2>
+<pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
+python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
+.venv/bin/python tools/make_cv.py --locale en -o cv.pdf</code></pre>
+<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
+because the operating system's own tooling depends on those packages.</p><p>Institutional portals often want a <em>handwritten</em> signature, not a typed name. Sign a blank sheet, cut it out with <a href="../extract-signature/">the signature extractor</a>, and pass <code>--signature signature.png</code>.</p>
+<footer>
+<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+</footer></div></body></html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo to PDF, offline — no upload, no account</title>
+<meta name="description" content="Turn photos of a document into a light A4 PDF, offline on your own machine. Fixes rotation and size. Nothing is uploaded.">
+<link rel="canonical" href="https://wilwork-de.github.io/scanfix/photo-to-pdf/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wilwork-de.github.io/scanfix/photo-to-pdf/">
+<meta property="og:title" content="Photo to PDF, offline — no upload, no account">
+<meta property="og:description" content="Turn photos of a document into a light A4 PDF, offline on your own machine. Fixes rotation and size. Nothing is uploaded.">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Turn photos into an A4 PDF", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/photo-to-pdf/", "description": "Turn photos of a document into a light A4 PDF, offline on your own machine. Fixes rotation and size. Nothing is uploaded.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+</head>
+<body>
+<div class="sheet">
+<nav class="top"><a href="../">scanfix</a> / Photo to PDF</nav>
+<h1>Turn photos into an A4 PDF</h1>
+<p class="tagline">For when you printed something, signed it, photographed it, and the form wants a PDF.</p>
+<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. The tool runs on your own machine, from your terminal: the document never leaves it and no server is involved.</span></div>
+<h2>What it does</h2>
+<p>Straight conversion, one photo per page. It fixes the rotation from the EXIF data — phone photos are almost always rotated in the metadata rather than in the pixels, so some viewers turn them and others do not, and your document arrives lying on its side. Then greyscale, which costs nothing on a document and cuts about two thirds of the weight, a flattened white background, and A4 layout.</p><p>If the result overshoots the size cap it steps the resolution down and tries again, rather than handing you a file the upload form will reject. For heavier correction — shadows, perspective — use <a href="../clean-scan/">the scan cleanup</a> instead.</p>
+<h2>One thing not to do</h2>
+<p>Do not rename <code>photo.jpg</code> to <code>photo.pdf</code>. The name does not change the contents: it is still a JPEG, and a portal rejects it by reading the first bytes, which say <code>JFIF</code> rather than <code>%PDF</code>. Obvious written down, extremely common in practice.</p>
+<h2>Run it</h2>
+<h2>Run it</h2>
+<pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
+python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
+.venv/bin/python tools/photo_to_pdf.py photo.jpg -o document.pdf</code></pre>
+<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
+because the operating system's own tooling depends on those packages.</p><p>Pass several images to get several pages, in the order you list them. <code>--max-mb 1.5</code> tightens the size cap.</p>
+<footer>
+<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+</footer></div></body></html>

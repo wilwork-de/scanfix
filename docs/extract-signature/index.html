@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extract a signature from a photo — offline, nothing uploaded</title>
+<meta name="description" content="Cut a handwritten signature out of a photograph and save it as a transparent PNG, offline on your own machine. Your signature is never uploaded to any server.">
+<link rel="canonical" href="https://wilwork-de.github.io/scanfix/extract-signature/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wilwork-de.github.io/scanfix/extract-signature/">
+<meta property="og:title" content="Extract a signature from a photo — offline, nothing uploaded">
+<meta property="og:description" content="Cut a handwritten signature out of a photograph and save it as a transparent PNG, offline on your own machine. Your signature is never uploaded to any server.">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Extract a signature from a photo", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/extract-signature/", "description": "Cut a handwritten signature out of a photograph and save it as a transparent PNG, offline on your own machine. Your signature is never uploaded to any server.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+</head>
+<body>
+<div class="sheet">
+<nav class="top"><a href="../">scanfix</a> / Signature extractor</nav>
+<h1>Extract a signature from a photo</h1>
+<p class="tagline">Turn a photo of your signature into a transparent PNG you can lay on any document.</p>
+<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. The tool runs on your own machine, from your terminal: the document never leaves it and no server is involved.</span></div>
+<h2>What it does</h2>
+<p>You photograph your signature, and it comes back as a PNG with a transparent background, trimmed to the strokes. Lay it on a contract, a form or a CV and the document stays sharp text instead of becoming a blurry scan of a printed page.</p><p>The separation is not a hard threshold. The illumination is corrected first, then the alpha channel is built from how dark each pixel is: light paper becomes transparent, dark ink opaque, and the values between stay semi-transparent. That keeps the edges smooth — a hard cut-off produces a jagged signature that looks obviously pasted.</p>
+<h2>Sign on a blank sheet</h2>
+<p>This is the one tip that matters. Sign a plain white sheet and photograph that, rather than photographing a form you have already signed. On a form the printed signature rule runs through your signature, and separating the two is genuinely hard: on a real case the rule was tilted just enough that its longest unbroken run in any pixel row reached 15% of the width while the signature's own strokes reached 13% — the two overlap, so no threshold removes one without eating the other.</p><p>On a blank sheet there is nothing to separate.</p>
+<h2>Run it</h2>
+<h2>Run it</h2>
+<pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
+python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
+.venv/bin/python tools/extract_signature.py photo.jpg -o signature.png</code></pre>
+<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
+because the operating system's own tooling depends on those packages.</p><p>Not sure which part of the photo to use? <code>--preview grid.png</code> writes a copy with a labelled grid, so you can read the four numbers off it and pass <code>--box x0,y0,x1,y1</code>. <code>--blue</code> keeps the pen colour instead of forcing black.</p>
+<footer>
+<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+</footer></div></body></html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remove shadows from a document photo — offline scan cleanup</title>
+<meta name="description" content="Remove shadows and uneven lighting from a photographed document, straighten the perspective and fit it to A4. Runs offline on your machine — no upload, no account.">
+<link rel="canonical" href="https://wilwork-de.github.io/scanfix/clean-scan/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wilwork-de.github.io/scanfix/clean-scan/">
+<meta property="og:title" content="Remove shadows from a document photo — offline scan cleanup">
+<meta property="og:description" content="Remove shadows and uneven lighting from a photographed document, straighten the perspective and fit it to A4. Runs offline on your machine — no upload, no account.">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Make a photo of a document look scanned", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any", "url": "https://wilwork-de.github.io/scanfix/clean-scan/", "description": "Remove shadows and uneven lighting from a photographed document, straighten the perspective and fit it to A4. Runs offline on your machine \u2014 no upload, no account.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true}</script>
+</head>
+<body>
+<div class="sheet">
+<nav class="top"><a href="../">scanfix</a> / Scan cleanup</nav>
+<h1>Make a photo of a document look scanned</h1>
+<p class="tagline">Flatten the lighting, straighten the page, and get a PDF that looks like it came off a scanner.</p>
+<div class="privacy-badge"><span aria-hidden="true">🔒</span><span class="body"><b>Private by construction.</b> Nothing is uploaded. The tool runs on your own machine, from your terminal: the document never leaves it and no server is involved.</span></div>
+<h2>Uneven light is removed by dividing, not by brightening</h2>
+<p>When you photograph a sheet, one half catches the lamp and the other stays in shadow — the top looks like a document and the bottom looks like a snapshot. Raising the brightness makes it worse, because it lightens the text too and washes out the half that was already fine.</p><p><em>Flat-field correction</em> blurs the content away hard, which leaves only the map of how light fell across the sheet, then divides the original by that map. Where the paper was dark you divide by a small number and brighten a lot; where it was already bright almost nothing changes. It is a local correction, so every area is treated according to the light it actually received. That is why it works where plain brightness fails.</p>
+<h2>A sheet photographed at an angle is a trapezoid</h2>
+<p>Not a rotated rectangle — which means no single rotation angle can straighten it. On a real case the slant of the text lines ran from 0.00° at the top to 1.00° at the bottom.</p><p>The tool measures two angles, one high on the page and one low, reconstructs the actual trapezoid and maps it back to a rectangle with a projective transform, iterating until the residual falls below 0.15° (measured: 1.05° → 0.25° → 0.00°). It does not need the edge of the sheet, which often is not detectable — on that case the background was brighter than the paper. It derives the geometry from the text itself.</p><p class="caveat">Straightening crops to the block of text, so it takes the sheet's margins with it. They are rebuilt afterwards, at the proportions of a normal document. If you prefer the page exactly as shot, <code>--no-straighten</code> and <code>--no-fit</code> turn both steps off.</p>
+<h2>Run it</h2>
+<h2>Run it</h2>
+<pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
+python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
+.venv/bin/python tools/clean_scan.py photo.jpg -o clean.pdf</code></pre>
+<p class="caveat">The virtual environment is not fussiness: on Debian and Ubuntu the
+system Python is protected (PEP 668) and a direct <code>pip install</code> is refused,
+because the operating system's own tooling depends on those packages.</p><p>It reports the real resolution of your photo on the page. Below about 150 dpi the text stays soft: cleaning removes the shadow but cannot invent detail the camera never captured, so a closer photo beats any amount of processing.</p>
+<footer>
+<p><a href="../">All tools</a> · <a href="https://github.com/wilwork-de/scanfix">Source on GitHub</a> · MIT licence</p>
+</footer></div></body></html>
