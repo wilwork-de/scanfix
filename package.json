@@ -1,0 +1,14 @@
+{
+  "name": "scanfix-tests",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pdfjs-dist": "^4.10.38"
+  },
+  "version": "0.1.0",
+  "description": "Test harness per il checker redazione di scanfix",
+  "scripts": {
+    "test": "node tests/prova_js.mjs"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,8 @@
+# controlla_redazione, aggiungi_data_firma, pulisci_scansione, estrai_firma, foto_in_pdf
+pymupdf>=1.24
+# pulisci_scansione, estrai_firma, foto_in_pdf
+pillow>=10.0
+# pulisci_scansione, estrai_firma
+numpy>=1.26
+# genera_cv
+fpdf2>=2.7

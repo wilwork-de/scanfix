@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>scanfix — strumenti per documenti PDF</title>
+<meta name="description" content="Controlla se l'oscuramento di un PDF regge davvero. Funziona nel browser: il documento non viene caricato da nessuna parte.">
+<style>
+  :root {
+    --fondo: #fbfaf8; --carta: #ffffff; --inchiostro: #1a202c; --tenue: #4a5568;
+    --debole: #a0aec0; --filetto: #e2e8f0; --accento: #2b6cb0;
+    --allarme: #c53030; --allarme-fondo: #fff5f5; --ok: #276749; --ok-fondo: #f0fff4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --fondo: #14171c; --carta: #1c2027; --inchiostro: #e8eaed; --tenue: #a8b0ba;
+      --debole: #6b7684; --filetto: #2c323b; --accento: #63a4e0;
+      --allarme: #fc8181; --allarme-fondo: #2a1b1b; --ok: #9ae6b4; --ok-fondo: #1a2a1f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--inchiostro);
+    font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .foglio { max-width: 780px; margin: 0 auto; padding: 40px 20px 72px; }
+  h1 { font-size: 30px; letter-spacing: -.02em; margin: 0 0 6px; }
+  h2 { font-size: 19px; margin: 44px 0 12px; letter-spacing: -.01em; }
+  h3 { font-size: 15px; margin: 26px 0 6px; }
+  p { margin: 0 0 14px; }
+  .sottotitolo { color: var(--tenue); font-size: 16px; margin-bottom: 30px; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+  code { background: var(--filetto); padding: 1px 5px; border-radius: 4px; }
+  pre {
+    background: var(--carta); border: 1px solid var(--filetto); border-radius: 8px;
+    padding: 12px 14px; overflow-x: auto; margin: 0 0 14px;
+  }
+  pre code { background: none; padding: 0; }
+  a { color: var(--accento); }
+
+  #zona {
+    border: 2px dashed var(--filetto); border-radius: 12px; background: var(--carta);
+    padding: 34px 20px; text-align: center; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  #zona:hover, #zona.sopra { border-color: var(--accento); background: var(--fondo); }
+  #zona strong { display: block; font-size: 16px; margin-bottom: 4px; }
+  #zona span { color: var(--tenue); font-size: 13px; }
+  #scegli { display: none; }
+
+  .privacy {
+    margin-top: 12px; font-size: 13px; color: var(--tenue);
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .privacy b { color: var(--inchiostro); font-weight: 600; }
+
+  #esito { margin-top: 24px; }
+  .verdetto { border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; border: 1px solid; }
+  .verdetto.sospetto { background: var(--allarme-fondo); border-color: var(--allarme); }
+  .verdetto.pulito { background: var(--ok-fondo); border-color: var(--ok); }
+  .verdetto h3 { margin: 0 0 4px; font-size: 16px; }
+  .verdetto.sospetto h3 { color: var(--allarme); }
+  .verdetto.pulito h3 { color: var(--ok); }
+  .verdetto p { margin: 0; font-size: 14px; color: var(--tenue); }
+
+  .reperto {
+    border: 1px solid var(--filetto); border-left: 3px solid var(--allarme);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; background: var(--carta);
+  }
+  .reperto .dove { font-size: 12px; color: var(--debole); margin-bottom: 6px; }
+  .recuperato {
+    background: var(--allarme-fondo); border-radius: 6px; padding: 8px 10px;
+    font-family: ui-monospace, monospace; font-size: 13px; word-break: break-word;
+  }
+  .nota-immagine { font-size: 13px; color: var(--tenue); }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin-bottom: 14px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--filetto); vertical-align: top; }
+  th { font-weight: 600; color: var(--tenue); font-size: 13px; }
+  .avvertenza {
+    border-left: 3px solid var(--debole); padding: 2px 0 2px 14px;
+    color: var(--tenue); font-size: 14px; margin: 0 0 14px;
+  }
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--filetto);
+    font-size: 13px; color: var(--debole);
+  }
+</style>
+</head>
+<body>
+<div class="foglio">
+
+  <h1>scanfix</h1>
+  <p class="sottotitolo">
+    Strumenti per rimettere in ordine i documenti PDF: pulire una foto di un foglio,
+    aggiungere data e firma, e verificare se un oscuramento regge davvero.
+  </p>
+
+  <h2>Il tuo PDF è davvero oscurato?</h2>
+  <p>
+    Un PDF non è un'immagine appiattita: è una pila di oggetti disegnati uno sull'altro.
+    Mettere un rettangolo nero sopra un nome <strong>aggiunge</strong> un oggetto, non ne
+    toglie uno. Il nome resta nel file, sotto, e si rilegge selezionandolo col mouse o con
+    tre righe di codice. È così che sono usciti atti giudiziari e documenti governativi che
+    si credevano censurati.
+  </p>
+
+  <div id="zona" role="button" tabindex="0" aria-label="Scegli un PDF da controllare">
+    <strong>Trascina qui un PDF</strong>
+    <span>oppure clicca per sceglierlo</span>
+    <input type="file" id="scegli" accept="application/pdf,.pdf">
+  </div>
+
+  <p class="privacy">
+    <span aria-hidden="true">🔒</span>
+    <span><b>Il documento non viene caricato da nessuna parte.</b> Il controllo gira
+    interamente nel browser: il file non lascia il tuo computer e nessun server lo vede.
+    Puoi staccare la rete dopo aver aperto questa pagina e funziona lo stesso.</span>
+  </p>
+
+  <div id="esito" aria-live="polite"></div>
+
+  <h2>Come si oscura davvero</h2>
+  <p>Tre passaggi, e il terzo non è facoltativo.</p>
+  <ol>
+    <li><strong>Rimuovere, non coprire.</strong> Una vera redazione cancella il contenuto.
+      In PyMuPDF: <code>page.add_redact_annot(rect)</code> seguito da
+      <code>page.apply_redactions()</code>.</li>
+    <li><strong>Oppure appiattire.</strong> Renderizzare la pagina in immagine, coprire,
+      riesportare. Grezzo, ma efficace: ricostruisce i pixel da zero.</li>
+    <li><strong>Ricontrollare il file finito</strong>, riaprendolo e riestraendo testo e
+      immagini. Con questa pagina, o con lo script da riga di comando.</li>
+  </ol>
+
+  <p class="avvertenza">
+    Un limite dichiarato: un rettangolo pieno sopra del testo non è sempre una censura.
+    Una fascia colorata di intestazione con la scritta bianca sopra, vista dal file, è la
+    stessa identica cosa. Per questo lo strumento non dà un verdetto secco ma mostra
+    <em>cosa</em> ha trovato sotto: se è un nome o un IBAN è una fuga, se è il titolo del
+    documento è grafica. Distinguerle da sole vorrebbe dire indovinare l'intenzione.
+  </p>
+
+  <h2>Gli altri strumenti</h2>
+  <p>Script Python da riga di comando, nella cartella <code>tools/</code> del repository.</p>
+  <table>
+    <thead><tr><th>Strumento</th><th>Cosa fa</th></tr></thead>
+    <tbody>
+      <tr><td><code>controlla_redazione.py</code></td>
+        <td>La stessa verifica di questa pagina, da terminale. Esce con codice 1 se trova
+            una possibile fuga, quindi si può mettere in una pipeline.</td></tr>
+      <tr><td><code>pulisci_scansione.py</code></td>
+        <td>Da foto di un foglio a scansione pulita: toglie l'ombra della luce non
+            uniforme, raddrizza la prospettiva e riporta il tutto su A4.</td></tr>
+      <tr><td><code>estrai_firma.py</code></td>
+        <td>Ritaglia una firma da una foto e la salva come PNG trasparente, per
+            appoggiarla su un documento digitale.</td></tr>
+      <tr><td><code>aggiungi_data_firma.py</code></td>
+        <td>Aggiunge luogo, data e riga per la firma in fondo a un PDF esistente, senza
+            rifarlo e senza toccare il resto.</td></tr>
+      <tr><td><code>foto_in_pdf.py</code></td>
+        <td>Da una o più foto a un PDF A4 leggero: raddrizza l'orientamento, converte in
+            scala di grigi, comprime sotto un limite di peso.</td></tr>
+      <tr><td><code>genera_cv.py</code></td>
+        <td>Genera un CV italiano in PDF da un dizionario di dati, con la formula privacy
+            e il blocco data e firma già a posto.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Installazione</h3>
+<pre><code>git clone https://github.com/wilwork-de/scanfix.git &amp;&amp; cd scanfix
+python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
+.venv/bin/python tools/controlla_redazione.py documento.pdf</code></pre>
+  <p class="avvertenza">
+    L'ambiente virtuale non è pignoleria: su Debian e Ubuntu il Python di sistema è
+    protetto (PEP 668) e <code>pip install</code> diretto viene rifiutato, perché gli
+    strumenti del sistema operativo dipendono da quei pacchetti.
+  </p>
+
+  <footer>
+    <p>
+      <a href="https://github.com/wilwork-de/scanfix">Codice su GitHub</a> · Licenza MIT ·
+      Il controllo in questa pagina è lo stesso file collaudato nei test del repository.
+    </p>
+  </footer>
+</div>
+
+<script type="module">
+import * as pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
+import { analizzaDocumento } from "./redaction-check.js";
+
+pdfjs.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+
+const zona = document.getElementById("zona");
+const scegli = document.getElementById("scegli");
+const esito = document.getElementById("esito");
+
+const scappa = s => s.replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+zona.addEventListener("click", () => scegli.click());
+zona.addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); scegli.click(); }
+});
+scegli.addEventListener("change", e => { if (e.target.files[0]) controlla(e.target.files[0]); });
+
+for (const evento of ["dragenter", "dragover"]) {
+  zona.addEventListener(evento, e => { e.preventDefault(); zona.classList.add("sopra"); });
+}
+for (const evento of ["dragleave", "drop"]) {
+  zona.addEventListener(evento, e => { e.preventDefault(); zona.classList.remove("sopra"); });
+}
+zona.addEventListener("drop", e => {
+  const f = e.dataTransfer.files[0];
+  if (f) controlla(f);
+});
+
+async function controlla(file) {
+  esito.innerHTML = `<p style="color:var(--tenue)">Analizzo <b>${scappa(file.name)}</b>…</p>`;
+  try {
+    const dati = new Uint8Array(await file.arrayBuffer());
+    const pdf = await pdfjs.getDocument({ data: dati, isEvalSupported: false }).promise;
+    const r = await analizzaDocumento(pdf, pdfjs.OPS);
+    mostra(file.name, r);
+    await pdf.destroy();
+  } catch (err) {
+    esito.innerHTML = `<div class="verdetto sospetto"><h3>Non sono riuscito a leggerlo</h3>
+      <p>${scappa(String(err && err.message || err))}</p></div>`;
+  }
+}
+
+function mostra(nome, r) {
+  if (r.verdetto === "PULITO") {
+    esito.innerHTML = `<div class="verdetto pulito">
+      <h3>Nessuna copertura sospetta</h3>
+      <p>${scappa(nome)} — ${r.totalePagine} pagine. Non ho trovato forme opache sopra
+      contenuto ancora estraibile. Attenzione: questo dice che non c'è
+      <em>questo</em> difetto, non che il documento sia privo di dati riservati in chiaro.</p>
+    </div>`;
+    return;
+  }
+
+  const quanti = r.pagine.reduce((n, p) => n + p.reperti.length, 0);
+  let html = `<div class="verdetto sospetto">
+    <h3>Oscuramento non affidabile</h3>
+    <p>${scappa(nome)} — ${quanti} forme opache sopra contenuto ancora estraibile.
+    Qui sotto c'è quello che si rilegge da sotto le coperture.</p>
+  </div>`;
+
+  for (const p of r.pagine) {
+    for (const d of p.reperti) {
+      html += `<div class="reperto">
+        <div class="dove">pagina ${p.pagina} · ${scappa(d.origine)} · riquadro
+          [${d.riquadro.join(", ")}]</div>`;
+      if (d.testoSotto) {
+        html += `<div class="recuperato">${scappa(d.testoSotto)}</div>`;
+      }
+      if (d.sopraImmagine) {
+        html += `<p class="nota-immagine" style="margin:${d.testoSotto ? "8px" : "0"} 0 0">
+          Copre un'immagine: il contenuto si recupera estraendo l'immagine incorporata,
+          che nessun rettangolo disegnato sopra modifica.</p>`;
+      }
+      html += `</div>`;
+    }
+  }
+  esito.innerHTML = html;
+}
+</script>
+</body>
+</html>
