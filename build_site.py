@@ -352,8 +352,8 @@ CONTENT = {
                 "looks like it came out of an office machine.</p>",
         "body": DROP.format(aria="Choose a photo of a document",
                             strong="Drop a photo of the page here",
-                            sub="or click to choose one",
-                            accept="image/*", multiple="") + """
+                            sub="or click to choose one. A PDF holding a photograph works too.",
+                            accept="image/*,application/pdf,.pdf", multiple="") + """
 <div class="controls">
   <label><input type="checkbox" id="straighten" checked> Straighten the perspective</label>
   <label><input type="checkbox" id="fit" checked> Rebuild the margins at A4</label>
@@ -423,8 +423,8 @@ CONTENT = {
                 "document, which stays sharp text.</p>",
         "body": DROP.format(aria="Choose a photo of your signature",
                             strong="Drop a photo of your signature here",
-                            sub="or click to choose one",
-                            accept="image/*", multiple="") + """
+                            sub="or click to choose one. A scan already saved as a PDF works too.",
+                            accept="image/*,application/pdf,.pdf", multiple="") + """
 <div id="stage" class="stage" hidden>
   <canvas id="shot"></canvas>
   <div id="box" class="croparea"><span id="handle" class="handle"></span></div>

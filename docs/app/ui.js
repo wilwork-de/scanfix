@@ -86,6 +86,47 @@ export function pixelsOf(image, maxWidth = 2400) {
   return { data: ctx.getImageData(0, 0, w, h).data, width: w, height: h, sourceWidth: sw, sourceHeight: sh };
 }
 
+export const isPdf = (file) =>
+  file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
+
+/**
+ * Pixels from the first page of a PDF, for the tools whose command-line versions
+ * also accept a photograph that somebody has already wrapped in one. That happens
+ * constantly: a portal hands back a PDF, or a scanner app only exports PDF.
+ *
+ * pdf.js is pulled in with a dynamic import, so it is fetched the first time someone
+ * actually drops a PDF and never on a page where they only ever drop a JPEG. The
+ * import is same-origin, which is what `script-src 'self'` allows and what the
+ * vendored copy in docs/vendor/ is for.
+ */
+export async function pixelsFromPdf(file, maxWidth = 2400) {
+  const pdfjs = await import("../vendor/pdf.min.mjs");
+  pdfjs.GlobalWorkerOptions.workerSrc = "../vendor/pdf.worker.min.mjs";
+  const data = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjs.getDocument({ data, isEvalSupported: false }).promise;
+  const page = await pdf.getPage(1);
+  const scale = Math.min(maxWidth / page.getViewport({ scale: 1 }).width, 4);
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(viewport.width);
+  canvas.height = Math.round(viewport.height);
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  // The page is drawn onto white. A PDF page has no background of its own, and
+  // without this the untouched areas come through as transparent black, which the
+  // flat-field correction then reads as the darkest shadow on the sheet.
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  page.cleanup();
+  await pdf.destroy();
+  return {
+    data: ctx.getImageData(0, 0, canvas.width, canvas.height).data,
+    width: canvas.width, height: canvas.height,
+    sourceWidth: canvas.width, sourceHeight: canvas.height,
+    fromPdf: true,
+  };
+}
+
 export function canvasOf(rgba, w, h) {
   const canvas = document.createElement("canvas");
   canvas.width = w;

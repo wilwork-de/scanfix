@@ -152,12 +152,15 @@ functions on the same synthetic page the JavaScript builds. `test_pdf.mjs` write
 PDFs with the vendored pdf-lib and opens each one again with pdf.js, because producing
 bytes is easy and producing bytes a reader can parse is not.
 
-There is a fifth suite that drives the pages in headless Chrome, with the CSP active,
-and clicks each download link to check the file that lands on disk:
+There is a fifth suite that drives the pages in headless Chrome with the CSP active,
+clicks each download link and checks the file that lands on disk. It is the only way to
+find out whether the policy has quietly broken something: a page whose policy forbids a
+connection still renders perfectly, right up to the moment a tool needs the thing it
+blocked.
 
 ```bash
 npm install --no-save puppeteer
-node tests/test_browser.mjs                   # 19 assertions
+node tests/test_browser.mjs                   # 29 assertions
 ```
 
 Puppeteer is not in `package.json` because it drags a whole browser down with it, and

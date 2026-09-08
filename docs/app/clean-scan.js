@@ -10,8 +10,8 @@ import * as PDFLib from "../vendor/pdf-lib.esm.min.js";
 import { toGrey, cleanScan, straightenPass, inkBox, a4Canvas } from "../imaging.js";
 import { A4, MARGIN, pixelWidthForDpi, dpiOfWidth, fitInside } from "../pdfout.js";
 import {
-  $, dropZone, status, yieldToPaint, loadImage, pixelsOf, canvasOf,
-  resizeCanvas, blobOf, bytesOf, offerDownload, humanSize, escapeHtml,
+  $, dropZone, status, yieldToPaint, loadImage, pixelsOf, pixelsFromPdf, isPdf,
+  canvasOf, resizeCanvas, blobOf, bytesOf, offerDownload, humanSize, escapeHtml,
 } from "./ui.js";
 
 const state = $("state");
@@ -48,9 +48,10 @@ async function process(file) {
   status(state, `Reading ${file.name}…`);
   await yieldToPaint();
 
-  const image = await loadImage(file);
-  let px = pixelsOf(image, 2400);
+  let px = isPdf(file) ? await pixelsFromPdf(file, 2400)
+                       : pixelsOf(await loadImage(file), 2400);
   const sourceW = px.sourceWidth, sourceH = px.sourceHeight;
+  const fromPdf = px.fromPdf === true;
   const realDpi = dpiOfWidth(sourceW);
   const remarks = [];
 
@@ -121,9 +122,10 @@ async function process(file) {
   save.textContent = `Save the PDF (${humanSize(blob.size)})`;
   status(state, "Done. Look at it before you send it.", "good");
 
-  remarks.push(`source photo ${sourceW}×${sourceH} px, ` +
-               `about ${Math.round(realDpi)} dpi on the page`);
-  if (realDpi < 150) {
+  remarks.push(fromPdf
+    ? `read from the first page of the PDF at ${sourceW}×${sourceH} px`
+    : `source photo ${sourceW}×${sourceH} px, about ${Math.round(realDpi)} dpi on the page`);
+  if (!fromPdf && realDpi < 150) {
     remarks.push("Under 150 dpi the text stays soft. Cleaning takes the shadow away, " +
                  "it cannot invent detail the camera never caught: a closer photo beats " +
                  "any amount of processing.");

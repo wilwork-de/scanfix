@@ -180,6 +180,22 @@ const fixture = name => path.join(FIXTURES, name);
   await finish(page, "clean scan");
 }
 
+// The command-line tools also take a photograph somebody has already wrapped in a
+// PDF, which is what a portal or a scanner app hands back. The page pulls pdf.js in
+// with a dynamic import the first time it sees one.
+{
+  const page = await visit("clean-scan/");
+  await (await page.$("#picker")).uploadFile(fixture("photo_with_boxes.pdf"));
+  await page.waitForFunction(() => !document.getElementById("save").hidden, { timeout: 90000 });
+  const file = await download(page, "#save");
+  const pdf = await readPdf(file);
+  const notes = await page.$eval("#notes", n => n.textContent);
+  pdf.pages === 1 && /read from the first page of the PDF/.test(notes)
+    ? ok("clean scan: a photograph wrapped in a PDF works too", `${fs.statSync(file).size} bytes`)
+    : bad("clean scan: a photograph wrapped in a PDF works too", notes.slice(0, 90));
+  await finish(page, "clean scan from a PDF");
+}
+
 // --- signature extractor ----------------------------------------------------
 
 {

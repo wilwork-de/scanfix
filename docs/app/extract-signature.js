@@ -8,8 +8,8 @@
 
 import { extractSignature } from "../imaging.js";
 import {
-  $, dropZone, status, yieldToPaint, loadImage, pixelsOf, canvasOf,
-  blobOf, offerDownload, humanSize,
+  $, dropZone, status, yieldToPaint, loadImage, pixelsOf, pixelsFromPdf, isPdf,
+  canvasOf, blobOf, offerDownload, humanSize,
 } from "./ui.js";
 
 const state = $("state");
@@ -35,8 +35,8 @@ async function open(file) {
     status(state, "Reading the photograph…");
     await yieldToPaint();
     name = file.name.replace(/\.[^.]+$/, "");
-    const image = await loadImage(file);
-    source = pixelsOf(image, 2400);
+    source = isPdf(file) ? await pixelsFromPdf(file, 2400)
+                         : pixelsOf(await loadImage(file), 2400);
     const canvas = canvasOf(source.data, source.width, source.height);
     shot.width = source.width;
     shot.height = source.height;
