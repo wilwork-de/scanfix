@@ -1,29 +1,29 @@
 /**
- * Controllo della redazione di un PDF, lato client.
+ * Client-side redaction check for PDFs.
  *
- * Rispecchia tools/controlla_redazione.py. Stessa idea, stesse soglie, stesso
- * verdetto: si cercano le forme piene abbastanza grandi e scure da nascondere
- * qualcosa, e si guarda cosa resta leggibile SOTTO di loro.
+ * Mirrors tools/check_redaction.py. Same idea, same thresholds, same verdict: find
+ * the filled shapes that are large and dark enough to hide something, then look at
+ * what is still readable UNDERNEATH them.
  *
- * Un PDF e' una pila di oggetti disegnati uno sull'altro, non un'immagine
- * appiattita. Un rettangolo sopra un nome aggiunge un oggetto, non ne toglie uno:
- * il nome resta nel file e si rilegge selezionandolo col mouse.
+ * A PDF is a stack of objects drawn one over another, not a flattened image. A
+ * rectangle over a name adds an object, it does not remove one: the name stays in
+ * the file and comes back by selecting it with the mouse.
  *
- * Il modulo non importa pdf.js: riceve il documento gia' aperto e la tabella OPS.
- * Cosi' lo stesso file gira nel browser (pdf.js dal CDN) e sotto Node nei test,
- * ed e' davvero lo stesso codice a essere collaudato e pubblicato.
+ * The module does not import pdf.js: it receives the already-open document and the
+ * OPS table. That way the same file runs in the browser (pdf.js from a CDN) and
+ * under Node in the tests, so the code that is tested is the code that ships.
  */
 
-export const SOGLIA_SCUREZZA = 0.12;   // sotto: tinta troppo chiara per coprire
-export const AREA_MINIMA = 60;         // punti quadrati: sotto e' decorazione
+export const DARKNESS_THRESHOLD = 0.12;   // below this the tint is too light to cover
+export const MIN_AREA = 60;               // square points; below this it is decoration
 
-// --- geometria minima -------------------------------------------------------
+// --- minimal geometry -------------------------------------------------------
 
-function applica(m, x, y) {
+function apply(m, x, y) {
   return [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
 }
 
-function moltiplica(a, b) {
+function multiply(a, b) {
   return [
     a[0] * b[0] + a[2] * b[1], a[1] * b[0] + a[3] * b[1],
     a[0] * b[2] + a[2] * b[3], a[1] * b[2] + a[3] * b[3],
@@ -31,172 +31,173 @@ function moltiplica(a, b) {
   ];
 }
 
-function riquadroTrasformato(m, x0, y0, x1, y1) {
-  const punti = [applica(m, x0, y0), applica(m, x1, y0), applica(m, x0, y1), applica(m, x1, y1)];
-  const xs = punti.map(p => p[0]), ys = punti.map(p => p[1]);
+function transformedBox(m, x0, y0, x1, y1) {
+  const pts = [apply(m, x0, y0), apply(m, x1, y0), apply(m, x0, y1), apply(m, x1, y1)];
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
 }
 
 function area(r) { return Math.max(0, r[2] - r[0]) * Math.max(0, r[3] - r[1]); }
 
-function siSovrappongono(a, b) {
+function overlap(a, b) {
   return a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
 }
 
-// --- colore -----------------------------------------------------------------
+// --- colour -----------------------------------------------------------------
 
-/** 0 = bianco, 1 = nero. Serve a scartare i riempimenti quasi bianchi. */
-function scurezza(colore) {
-  if (!colore) return 0;
-  const media = (colore[0] + colore[1] + colore[2]) / 3;
-  return 1 - media / 255;
+/** 0 = white, 1 = black. Used to discard near-white fills. */
+function darkness(colour) {
+  if (!colour) return 0;
+  const mean = (colour[0] + colour[1] + colour[2]) / 3;
+  return 1 - mean / 255;
 }
 
-// --- lettura della pagina ---------------------------------------------------
+// --- reading a page ---------------------------------------------------------
 
 /**
- * Cammina la lista degli operatori e raccoglie forme piene e immagini.
+ * Walk the operator list and collect filled shapes and images.
  *
- * Il disegno in un PDF e' una macchina a stati: save/restore impilano la matrice
- * corrente, transform la moltiplica, constructPath prepara un tracciato e solo
- * un'operazione di riempimento lo materializza. Quindi non basta vedere un
- * rettangolo: bisogna vedere se qualcuno lo ha effettivamente riempito, e con
- * quale colore, perche' un tracciato senza riempimento non copre niente.
+ * Drawing in a PDF is a state machine: save/restore push the current matrix,
+ * transform multiplies it, constructPath prepares a path and only a fill operation
+ * actually paints it. So seeing a rectangle is not enough — you have to see whether
+ * anything filled it, and in what colour, because a path with no fill covers nothing.
  */
-async function elementiDellaPagina(page, OPS) {
-  const lista = await page.getOperatorList();
-  const forme = [];
-  const immagini = [];
+async function pageElements(page, OPS) {
+  const list = await page.getOperatorList();
+  const shapes = [];
+  const images = [];
 
   let ctm = [1, 0, 0, 1, 0, 0];
-  const pila = [];
-  let riempimento = null;
-  let tracciato = null;
+  const stack = [];
+  let fill = null;
+  let path = null;
 
-  for (let i = 0; i < lista.fnArray.length; i++) {
-    const op = lista.fnArray[i];
-    const args = lista.argsArray[i];
+  for (let i = 0; i < list.fnArray.length; i++) {
+    const op = list.fnArray[i];
+    const args = list.argsArray[i];
 
-    if (op === OPS.save) { pila.push(ctm.slice()); continue; }
-    if (op === OPS.restore) { ctm = pila.pop() || [1, 0, 0, 1, 0, 0]; continue; }
-    if (op === OPS.transform) { ctm = moltiplica(ctm, args); continue; }
+    if (op === OPS.save) { stack.push(ctm.slice()); continue; }
+    if (op === OPS.restore) { ctm = stack.pop() || [1, 0, 0, 1, 0, 0]; continue; }
+    if (op === OPS.transform) { ctm = multiply(ctm, args); continue; }
 
-    if (op === OPS.setFillRGBColor) { riempimento = [args[0], args[1], args[2]]; continue; }
-    if (op === OPS.setFillGray) { const v = args[0] * 255; riempimento = [v, v, v]; continue; }
+    if (op === OPS.setFillRGBColor) { fill = [args[0], args[1], args[2]]; continue; }
+    if (op === OPS.setFillGray) { const v = args[0] * 255; fill = [v, v, v]; continue; }
     if (op === OPS.setFillCMYKColor) {
-      const [c, m2, y2, k] = args;
-      riempimento = [255 * (1 - Math.min(1, c + k)), 255 * (1 - Math.min(1, m2 + k)),
-                     255 * (1 - Math.min(1, y2 + k))];
+      const [c, m, y, k] = args;
+      fill = [255 * (1 - Math.min(1, c + k)), 255 * (1 - Math.min(1, m + k)),
+              255 * (1 - Math.min(1, y + k))];
       continue;
     }
 
     if (op === OPS.constructPath) {
-      // args = [operazioni, coordinate, minMax]. Il terzo elemento e' gia' il
-      // riquadro del tracciato, quindi non serve ricostruirlo dai segmenti.
+      // args = [operations, coordinates, minMax]. The third element is already the
+      // bounding box of the path, so it need not be rebuilt from the segments.
       const mm = args[2];
-      tracciato = (mm && mm.length === 4) ? riquadroTrasformato(ctm, mm[0], mm[1], mm[2], mm[3]) : null;
+      path = (mm && mm.length === 4) ? transformedBox(ctm, mm[0], mm[1], mm[2], mm[3]) : null;
       continue;
     }
 
-    const riempie = op === OPS.fill || op === OPS.eoFill || op === OPS.fillStroke ||
-                    op === OPS.eoFillStroke || op === OPS.closeFillStroke;
-    if (riempie && tracciato) {
-      forme.push({ riquadro: tracciato, scurezza: scurezza(riempimento), origine: "disegno" });
-      tracciato = null;
+    const fills = op === OPS.fill || op === OPS.eoFill || op === OPS.fillStroke ||
+                  op === OPS.eoFillStroke || op === OPS.closeFillStroke;
+    if (fills && path) {
+      shapes.push({ box: path, darkness: darkness(fill), source: "drawing" });
+      path = null;
       continue;
     }
 
     if (op === OPS.paintImageXObject || op === OPS.paintInlineImageXObject) {
-      // Un'immagine si disegna mappando il quadrato unitario con la matrice
-      // corrente: il suo posto sulla pagina e' quel quadrato trasformato.
-      immagini.push(riquadroTrasformato(ctm, 0, 0, 1, 1));
+      // An image is painted by mapping the unit square through the current matrix:
+      // its place on the page is that square, transformed.
+      images.push(transformedBox(ctm, 0, 0, 1, 1));
     }
   }
 
-  return { forme, immagini };
+  return { shapes, images };
 }
 
-/** Testo con la sua posizione, nello stesso spazio delle forme. */
-async function testoDellaPagina(page) {
-  const contenuto = await page.getTextContent();
-  return contenuto.items
+/** Text with its position, in the same space as the shapes. */
+async function pageText(page) {
+  const content = await page.getTextContent();
+  return content.items
     .filter(it => it.str && it.str.trim())
     .map(it => {
       const t = it.transform;
       const x = t[4], y = t[5];
-      return { testo: it.str, riquadro: [x, y, x + (it.width || 0), y + (it.height || 0)] };
+      return { text: it.str, box: [x, y, x + (it.width || 0), y + (it.height || 0)] };
     });
 }
 
-/** Annotazioni quadrate o evidenziatori: coprono come un rettangolo, e in piu' */
-/** spesso si tolgono con un clic nel lettore. */
-async function annotazioniCoprenti(page) {
+/**
+ * Square and highlight annotations: they cover like a rectangle, and worse, in many
+ * readers they come off with a single click.
+ */
+async function coveringAnnotations(page) {
   let annots = [];
   try { annots = await page.getAnnotations(); } catch { return []; }
-  const fuori = [];
+  const out = [];
   for (const a of annots) {
-    const tipo = a.subtype || "";
-    if (!["Square", "Highlight", "Redact"].includes(tipo)) continue;
+    const kind = a.subtype || "";
+    if (!["Square", "Highlight", "Redact"].includes(kind)) continue;
     if (!a.rect || a.rect.length !== 4) continue;
     const r = [Math.min(a.rect[0], a.rect[2]), Math.min(a.rect[1], a.rect[3]),
                Math.max(a.rect[0], a.rect[2]), Math.max(a.rect[1], a.rect[3])];
     const c = a.color || a.interiorColor;
-    fuori.push({
-      riquadro: r,
-      scurezza: c ? scurezza([c[0], c[1], c[2]]) : 1,
-      origine: `annotazione ${tipo}`,
+    out.push({
+      box: r,
+      darkness: c ? darkness([c[0], c[1], c[2]]) : 1,
+      source: `${kind} annotation`,
     });
   }
-  return fuori;
+  return out;
 }
 
-// --- analisi ----------------------------------------------------------------
+// --- analysis ---------------------------------------------------------------
 
 /**
- * @param {*} pdf documento gia' aperto da pdf.js
- * @param {*} OPS tabella pdfjsLib.OPS
- * @returns {Promise<{verdetto: string, pagine: Array, totalePagine: number}>}
+ * @param {*} pdf document already opened by pdf.js
+ * @param {*} OPS the pdfjsLib.OPS table
+ * @returns {Promise<{verdict: string, pages: Array, totalPages: number}>}
  */
-export async function analizzaDocumento(pdf, OPS) {
-  const pagine = [];
+export async function analyseDocument(pdf, OPS) {
+  const pages = [];
 
   for (let n = 1; n <= pdf.numPages; n++) {
     const page = await pdf.getPage(n);
-    const { forme, immagini } = await elementiDellaPagina(page, OPS);
-    const testi = await testoDellaPagina(page);
-    const tutte = forme.concat(await annotazioniCoprenti(page));
+    const { shapes, images } = await pageElements(page, OPS);
+    const texts = await pageText(page);
+    const all = shapes.concat(await coveringAnnotations(page));
 
-    const reperti = [];
-    for (const forma of tutte) {
-      const r = forma.riquadro;
-      if (area(r) < AREA_MINIMA) continue;
-      if (forma.scurezza < SOGLIA_SCUREZZA) continue;
+    const findings = [];
+    for (const shape of all) {
+      const r = shape.box;
+      if (area(r) < MIN_AREA) continue;
+      if (shape.darkness < DARKNESS_THRESHOLD) continue;
 
-      // Si stringe di un punto per non catturare il testo che sfiora il bordo
-      // della forma senza esserci sotto davvero.
-      const dentro = [r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 1];
-      const sotto = testi.filter(t => siSovrappongono(dentro, t.riquadro))
-                         .map(t => t.testo).join(" ").trim();
-      const sopraImmagine = immagini.some(im => siSovrappongono(r, im));
+      // Shrink by one point so text that merely grazes the edge of the shape is not
+      // counted as sitting underneath it.
+      const inner = [r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 1];
+      const underneath = texts.filter(t => overlap(inner, t.box))
+                              .map(t => t.text).join(" ").trim();
+      const overImage = images.some(im => overlap(r, im));
 
-      if (!sotto && !sopraImmagine) continue;   // copre carta bianca: e' grafica
+      if (!underneath && !overImage) continue;   // covers blank paper: graphics
 
-      reperti.push({
-        riquadro: r.map(v => Math.round(v * 10) / 10),
-        origine: forma.origine,
-        scurezza: Math.round(forma.scurezza * 1000) / 1000,
-        testoSotto: sotto.slice(0, 300),
-        sopraImmagine,
+      findings.push({
+        box: r.map(v => Math.round(v * 10) / 10),
+        source: shape.source,
+        darkness: Math.round(shape.darkness * 1000) / 1000,
+        textUnderneath: underneath.slice(0, 300),
+        overImage,
       });
     }
 
-    if (reperti.length) pagine.push({ pagina: n, reperti });
+    if (findings.length) pages.push({ page: n, findings });
     page.cleanup();
   }
 
   return {
-    totalePagine: pdf.numPages,
-    pagine,
-    verdetto: pagine.length ? "SOSPETTO" : "PULITO",
+    totalPages: pdf.numPages,
+    pages,
+    verdict: pages.length ? "SUSPECT" : "CLEAN",
   };
 }

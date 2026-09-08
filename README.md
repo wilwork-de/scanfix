@@ -1,117 +1,113 @@
 # scanfix
 
-Strumenti da riga di comando per rimettere in ordine i documenti PDF: pulire la foto
-di un foglio, aggiungere data e firma, e **verificare se un oscuramento regge davvero**.
+Command-line tools for putting PDF documents back in order: clean up a phone photo of
+a sheet of paper, add a date and signature block, and **check whether a redaction
+actually holds**.
 
-*English: command-line tools for fixing up PDF documents — clean a phone photo of a
-sheet of paper into something that looks scanned, add a date and signature block, and
-check whether a redaction actually removed the content or merely drew a box over it.
-Code and docs are in Italian; the tools are self-contained and the `--help` of each
-one explains its flags.*
-
-**Sito con il controllo redazione interattivo:** https://wilwork-de.github.io/scanfix/ —
-gira interamente nel browser, il documento non viene caricato da nessuna parte.
+**Live redaction checker:** https://wilwork-de.github.io/scanfix/ — it runs entirely
+in your browser, the document is never uploaded anywhere.
 
 ---
 
-## Il controllo della redazione
+## The redaction check
 
-Un PDF non è un'immagine appiattita: è una pila di oggetti disegnati uno sull'altro.
-Mettere un rettangolo nero sopra un nome **aggiunge** un oggetto, non ne toglie uno.
-Il nome resta nel file, sotto, e si rilegge selezionandolo col mouse o con tre righe
-di codice. È così che sono usciti atti giudiziari e documenti governativi che si
-credevano censurati, e vale identico per i rettangoli di Word, per gli evidenziatori
-e per i tool online che promettono di censurare un PDF.
+A PDF is not a flattened image: it is a stack of objects drawn one over another.
+Putting a black rectangle over a name **adds** an object, it does not remove one. The
+name stays in the file, underneath, and comes back by selecting it with the mouse or
+with three lines of code. This is how court filings and government documents have
+leaked while their authors believed them censored, and it holds just the same for
+rectangles drawn in Word, for highlighter annotations, and for the online tools that
+promise to censor a PDF for you.
 
 ```console
-$ python3 tools/controlla_redazione.py documento.pdf
-SOSPETTO  documento.pdf — 3 forme opache sopra contenuto ancora estraibile
-  pagina 1  disegno  riquadro [56.0, 148.0, 156.3, 164.0]
-     testo leggibile sotto: 'Nome: Mario Rossi'
-  pagina 1  disegno  riquadro [56.0, 182.0, 244.8, 198.0]
-     testo leggibile sotto: 'Codice fiscale: RSSMRA80A01H501U'
-  pagina 1  disegno  riquadro [56.0, 216.0, 250.7, 232.0]
-     testo leggibile sotto: 'IBAN: IT60X0542811101000000123456'
+$ python3 tools/check_redaction.py document.pdf
+SUSPECT  document.pdf — 3 opaque shapes over still-extractable content
+  page 1  drawing  rect [58.0, 149.0, 158.4, 164.0]
+     readable text underneath: 'Name: Mario Rossi'
+  page 1  drawing  rect [58.0, 183.0, 247.1, 198.0]
+     readable text underneath: 'Tax code: RSSMRA80A01H501U'
+  page 1  drawing  rect [58.0, 217.0, 253.0, 232.0]
+     readable text underneath: 'IBAN: IT60X0542811101000000123456'
 ```
 
-Esce con codice `1` quando trova una possibile fuga e `0` quando non trova niente,
-quindi si può mettere in una pipeline o in un hook pre-commit.
+It exits with `1` when it finds a possible leak and `0` when it finds nothing, so it
+drops into a pipeline or a pre-commit hook.
 
-### Perché mostra il testo invece di dare solo un verdetto
+### Why it prints the text instead of just a verdict
 
-Un rettangolo pieno sopra del testo non è sempre una censura: una fascia colorata di
-intestazione con la scritta bianca sopra, vista dal file, è la stessa identica cosa.
-Mostrando *cosa* c'è sotto, la distinzione la fa una persona in un secondo — se è un
-IBAN è una fuga, se è il titolo del documento è grafica. Distinguerle da sole
-vorrebbe dire indovinare l'intenzione di chi ha impaginato, e lo strumento non ci
-prova: fra i campioni di collaudo c'è anche il falso positivo, dichiarato.
+A filled rectangle over text is not always a censorship: a coloured header band with
+white type on it, seen from the file, is exactly the same thing. By showing *what* is
+underneath, a person makes the distinction in a second — an account number is a leak,
+the document's own title is graphics. Doing it automatically would mean guessing at
+the intent of whoever laid the page out, and this tool does not try: the known false
+positive is one of the five test fixtures, on purpose.
 
-### Come si oscura davvero
+### How to redact for real
 
-1. **Rimuovere invece di coprire**: `page.add_redact_annot(rect)` seguito da
+1. **Remove instead of covering**: `page.add_redact_annot(rect)` followed by
    `page.apply_redactions()`.
-2. **Oppure appiattire**: renderizzare la pagina in immagine, coprire, riesportare.
-   Grezzo ma efficace, perché ricostruisce i pixel da zero.
-3. **Ricontrollare il file finito.** Non è facoltativo, ed è il passaggio che salta
-   chiunque abbia pubblicato un documento mal censurato.
+2. **Or flatten**: render the page to an image, cover, re-export. Crude but effective,
+   because it rebuilds the pixels from scratch.
+3. **Check the finished file.** Not optional, and it is the step skipped by everyone
+   who has ever published a badly censored document.
 
 ---
 
-## Gli strumenti
+## The tools
 
-| Strumento | Cosa fa |
+| Tool | What it does |
 |---|---|
-| `controlla_redazione.py` | Verifica se le coperture di un PDF nascondono davvero |
-| `pulisci_scansione.py` | Da foto di un foglio a scansione pulita: toglie l'ombra, raddrizza la prospettiva, riporta su A4 |
-| `estrai_firma.py` | Ritaglia una firma da una foto e la salva come PNG trasparente |
-| `aggiungi_data_firma.py` | Aggiunge luogo, data e riga della firma in fondo a un PDF esistente |
-| `foto_in_pdf.py` | Da una o più foto a un PDF A4 leggero, sotto un limite di peso |
-| `genera_cv.py` | Genera un CV italiano in PDF da un dizionario di dati |
+| `check_redaction.py` | Checks whether a PDF's covers actually hide anything |
+| `clean_scan.py` | From a photo of a sheet to a clean scan: removes the shadow, straightens the perspective, fits to A4 |
+| `extract_signature.py` | Cuts a signature out of a photograph and saves it as a transparent PNG |
+| `add_date_signature.py` | Adds a place, date and signature rule to the foot of an existing PDF |
+| `photo_to_pdf.py` | From one or more photos to a light A4 PDF, under a size cap |
+| `make_cv.py` | Generates a one-page CV as a PDF from a data dictionary, in English or Italian |
 
-### Due cose che valgono più del codice
+### Two things worth more than the code
 
-**La luce non uniforme si toglie dividendo, non schiarendo.** Fotografando un foglio
-una metà prende luce e l'altra resta in ombra. Alzare la luminosità peggiora le cose,
-perché schiarisce anche il testo. La *flat-field correction* sfoca via il contenuto
-per ricavare la mappa della luce, poi ci divide sopra l'originale: correzione locale,
-ogni zona trattata secondo la luce che ha ricevuto.
+**Uneven light is removed by dividing, not by brightening.** When you photograph a
+sheet, one half catches the lamp and the other stays in shadow. Raising the brightness
+makes it worse, because it lightens the text too. *Flat-field correction* blurs the
+content away to recover the map of the light, then divides the original by it: a local
+correction, every area treated according to the light it actually received.
 
-**Un foglio fotografato di sbieco è un trapezio, non un rettangolo ruotato.** Su un
-caso reale l'inclinazione delle righe passava da 0.00° in cima a 1.00° in fondo:
-nessuna rotazione singola può sistemarlo. `pulisci_scansione.py` misura due angoli,
-costruisce il trapezio e lo rimanda a rettangolo con una trasformazione proiettiva,
-iterando finché il residuo scende sotto 0.15° (misurato: 1.05° → 0.25° → 0.00°). Non
-usa il bordo del foglio, che spesso non è rilevabile: ricava la geometria dal testo.
+**A sheet photographed at an angle is a trapezoid, not a rotated rectangle.** On a real
+case the slant of the text lines ran from 0.00° at the top to 1.00° at the bottom: no
+single rotation can fix that. `clean_scan.py` measures two angles, reconstructs the
+trapezoid and maps it back to a rectangle with a projective transform, iterating until
+the residual drops below 0.15° (measured: 1.05° → 0.25° → 0.00°). It does not use the
+edge of the sheet, which is often not detectable — it derives the geometry from the text.
 
 ---
 
-## Installazione
+## Install
 
 ```bash
 git clone https://github.com/wilwork-de/scanfix.git && cd scanfix
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python tools/controlla_redazione.py documento.pdf
+.venv/bin/python tools/check_redaction.py document.pdf
 ```
 
-L'ambiente virtuale non è pignoleria: su Debian e Ubuntu il Python di sistema è
-protetto (PEP 668) e `pip install` diretto viene rifiutato, perché gli strumenti del
-sistema operativo dipendono da quei pacchetti.
+The virtual environment is not fussiness: on Debian and Ubuntu the system Python is
+protected (PEP 668) and a direct `pip install` is refused, because the operating
+system's own tooling depends on those packages.
 
-## Collaudo
+## Tests
 
 ```bash
-PY=.venv/bin/python bash tests/prova.sh    # 10 asserzioni, versione Python
-npm install && node tests/prova_js.mjs     # 10 asserzioni, versione JavaScript
+PY=.venv/bin/python bash tests/run_tests.sh   # 10 assertions, Python side
+npm install && node tests/test_js.mjs         # 10 assertions, JavaScript side
 ```
 
-I campioni di prova sono **generati**, non raccolti: `tests/genera_campioni.py`
-costruisce cinque PDF con nomi e numeri inventati. Nessun documento reale, di
-nessuno, entra in questo repository.
+The fixtures are **generated, not collected**: `tests/make_fixtures.py` builds five
+PDFs with invented names and numbers. No real document, belonging to anyone, goes into
+this repository.
 
-Le due suite girano sugli stessi campioni e devono dare gli **stessi verdetti**: il
-file `docs/redaction-check.js` che gira nel sito è lo stesso collaudato da Node, non
-una riscrittura parallela che può divergere in silenzio.
+The two suites run against the same fixtures and must return the **same verdicts**:
+`docs/redaction-check.js`, the file the site loads, is the same one Node tests, not a
+parallel rewrite that can drift apart in silence.
 
-## Licenza
+## Licence
 
 MIT.

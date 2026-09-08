@@ -3,6 +3,6 @@ __pycache__/
 .venv/
 venv/
 node_modules/
-tests/campioni/
+tests/fixtures/
 *.pdf
 !tests/attesi/*.pdf

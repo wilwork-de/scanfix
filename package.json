@@ -6,9 +6,9 @@
     "pdfjs-dist": "^4.10.38"
   },
   "version": "0.1.0",
-  "description": "Test harness per il checker redazione di scanfix",
+  "description": "Test harness for the scanfix redaction checker",
   "scripts": {
-    "test": "node tests/prova_js.mjs"
+    "test": "node tests/test_js.mjs"
   },
   "license": "MIT"
 }
