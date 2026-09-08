@@ -64,6 +64,22 @@ PY
 then printf '  ok    %-52s\n' "a page with images always yields an area"; passed=$((passed+1))
 else printf '  FAIL  %-52s\n' "image rectangles"; failed=$((failed+1)); fi
 
+echo "Deskew on a page whose text does not fill it:"
+if "$PY" - "$ROOT/tools" "$HERE/fixtures/short_note.png" <<'DESKEW'
+import sys
+sys.path.insert(0, sys.argv[1])
+from pathlib import Path
+from clean_scan import _one_pass, load
+_, fan = _one_pass(load(Path(sys.argv[2])))
+# The page is rendered dead straight, so any fan-out reported here is invented.
+# Before the fix this measured 6.60 degrees: the lower measurement band was taken
+# at a fixed fraction of the frame and landed on blank paper, where every angle
+# scores the same and the tie broke at the top of the search range.
+assert fan < 0.15, f"straight page reported {fan:.2f} degrees of fan-out"
+DESKEW
+then printf '  ok    %-52s\n' "a straight short page reports no fan-out"; passed=$((passed+1))
+else printf '  FAIL  %-52s\n' "straight short page still warped"; failed=$((failed+1)); fi
+
 echo
 echo "$passed passed, $failed failed"
 [ "$failed" -eq 0 ]

@@ -97,6 +97,15 @@ def text_line_angle(im: Image.Image, limit=6.0) -> float:
     """
     im = im.resize((700, max(int(700 * im.height / im.width), 40)), Image.BILINEAR)
 
+    # Nothing to measure means no answer. A band of blank paper gives a flat profile
+    # where every angle scores the same, and the tie is then broken by whichever
+    # angle happens to sort highest — six degrees, on a page that was straight. That
+    # bogus fan-out was then dutifully "corrected", warping a document that was fine.
+    # So check there is ink in the band before believing anything measured in it.
+    sample = np.asarray(im, dtype=np.uint8)
+    if (sample < 170).mean() < 0.002:
+        return 0.0
+
     def score(a):
         r = np.asarray(im.rotate(a, resample=Image.BILINEAR, fillcolor=255), dtype=np.float32)
         return float((np.diff((255.0 - r).sum(axis=1)) ** 2).sum())
@@ -129,8 +138,19 @@ def _one_pass(img: Image.Image):
         return img, 0.0
     y0, y1, x0, x1 = rows[0], rows[-1], cols[0], cols[-1]
 
-    top = np.radians(text_line_angle(flat.crop((0, int(H * 0.08), W, int(H * 0.35)))))
-    bottom = np.radians(text_line_angle(flat.crop((0, int(H * 0.65), W, int(H * 0.95)))))
+    # The bands are cut out of the block of TEXT, not out of the frame. Taken at
+    # fixed fractions of the frame they are wrong the moment the text does not fill
+    # the page: on a short letter with white space below, the lower band lands on
+    # blank paper and measures noise.
+    text_height = y1 - y0
+
+    def band(from_y, to_y):
+        if to_y - from_y < 8:
+            return 0.0
+        return text_line_angle(flat.crop((0, int(from_y), W, int(to_y))))
+
+    top = np.radians(band(y0, y0 + int(text_height * 0.4)))
+    bottom = np.radians(band(y0 + int(np.ceil(text_height * 0.6)), y1))
     width = x1 - x0
 
     source = [(x0, y0), (x1, y0 + width * np.tan(top)),

@@ -156,10 +156,31 @@ def signature_png():
     doc.close()
 
 
+def short_note():
+    """A perfectly straight page whose text only fills the top third.
+
+    The regression fixture for the deskew: with the measurement bands taken at fixed
+    fractions of the frame, the lower one landed on blank paper, measured 6.6 degrees
+    of nothing, and the tool then "corrected" a page that was already square.
+    """
+    doc = pymupdf.open()
+    page = doc.new_page()
+    page.insert_text((60, 90), "Short note", fontname="hebo", fontsize=16)
+    for i, y in enumerate(range(130, 260, 22)):
+        page.insert_text((60, y), f"Line {i} of an entirely straight document.",
+                         fontname="helv", fontsize=11)
+    # Saved as an image, because that is what the cleanup takes: a photograph of a
+    # sheet. Rendered dead straight, so any rotation the tool applies is its own
+    # invention.
+    pix = page.get_pixmap(dpi=110)
+    pix.save(OUT / "short_note.png")
+    doc.close()
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     for f in (fake_redaction, real_redaction, photo_with_boxes, clean_document,
-              graphic_band, page_photo, signature_png):
+              graphic_band, short_note, page_photo, signature_png):
         f()
         print(f"  {f.__name__}")
     print(f"Fixtures in {OUT}")
